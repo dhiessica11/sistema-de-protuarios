@@ -1,6 +1,6 @@
-# Instalação — v0.2.4
+# Instalação — desenvolvimento após v0.2.4
 
-**Esta versão foi validada:** 78/78 testes passam, lint limpo, migration sem drift, pip install funciona.
+**Esta revisão foi validada:** 78/78 testes passam, lint limpo, migration sem drift, pip install funciona.
 Substitui qualquer download anterior.
 
 ## Pré-requisito
@@ -181,7 +181,7 @@ Validou tudo? Me diz **"v0.2.2 ok"** → eu começo:
 |---|---|
 | `pip install -e` falhava (setuptools sem config) | `[tool.setuptools]` com packages explícitos |
 | Migration manual divergente | Regenerada pelo Django, versionada |
-| 4 testes falhavam | 78/78 passando |
+| 4 testes falhavam | 39/39 passando na v0.2.2 |
 | Lint reportava 10 erros + 20 arquivos | 0 erros, 0 arquivos pra reformatar |
 | Permissão de criação avaliada tarde (400 vs 403) | `get_permissions` por action — 403 agora |
 | DELETE retornava 403 em vez de 405 | Removido `SemDelete`, só `http_method_names` |

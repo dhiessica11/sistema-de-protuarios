@@ -3,7 +3,7 @@
 Sistema de prontuário clínico infantil (fonoaudiologia + TO + psicologia).
 Compliance CFFa 777/2025 + LGPD. Single-tenant self-hosted.
 
-**Versão:** 0.2.4 (dependências e leitura de chaves corrigidas sobre os Lotes 1 + 2)
+**Versão-base:** 0.2.4 (dependências e leitura de chaves corrigidas sobre os Lotes 1 + 2)
 **Status:** Em desenvolvimento, nunca rodou em produção. Sobre a v0.2.4: STRIDE e correção de vínculo do responsável em revisão.
 
 ## Pré-validação
@@ -158,7 +158,7 @@ Rebuild: `docker compose up --build --force-recreate web`.
 ## Status dos lotes
 
 - [x] **Lote 1** — Infra Docker + Django base
-- [x] **Lote 2 (v0.2.2)** — Models core + cifra multi-chave + API v1 + 78 testes
+- [x] **Lote 2 (v0.2.2)** — Models core + cifra multi-chave + API v1 + 39 testes na entrega original
 - [ ] **Lote 3** — Registro clínico + autoria imutável + retificação + assinatura avançada (gov.br obrigatório)
 - [ ] **Lote 4** — Agenda + faltas + feriados
 - [ ] **Lote 5** — Documentos + upload seguro + ClamAV
