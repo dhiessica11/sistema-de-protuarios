@@ -2,11 +2,14 @@
 Serializers DRF - validacao de regras de negocio ANTES de persistir.
 """
 
+from django.db import transaction
 from rest_framework import serializers
 
-from apps.core.validators import validar_cpf, validar_data_nascimento
+from apps.core.validators import normalizar_cpf, validar_cpf, validar_data_nascimento
 
+from .cadastro_permissions import validar_campos_de_escrita
 from .models import (
+    AlteracaoCadastral,
     Clinica,
     Consentimento,
     Paciente,
@@ -44,11 +47,93 @@ class ClinicaSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "criado_em", "atualizado_em")
 
 
-class PacienteSerializer(serializers.ModelSerializer):
+class CadastroProtegidoSerializer(serializers.ModelSerializer):
+    justificativa_alteracao = serializers.CharField(
+        write_only=True, required=False, min_length=10, max_length=2000
+    )
+    campos_atualizacao_clinico = frozenset()
+
+    def to_internal_value(self, data):
+        validar_campos_de_escrita(self, data)
+        return super().to_internal_value(data)
+
+    def campos_identificacao_alterados(self, attrs):
+        if self.instance is None:
+            return []
+        alterados = []
+        for fonte, publico in self.campos_identificacao.items():
+            if fonte not in attrs:
+                continue
+            atual = getattr(self.instance, fonte)
+            if fonte == "cpf_cifrado":
+                atual = normalizar_cpf(atual)
+            if attrs[fonte] != atual:
+                alterados.append(publico)
+        return sorted(alterados)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if self.campos_identificacao_alterados(attrs) and not attrs.get("justificativa_alteracao"):
+            raise serializers.ValidationError(
+                {"justificativa_alteracao": "Alteracao de identificacao exige justificativa."}
+            )
+        return attrs
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        # Revalida sobre a linha atual sob lock: um snapshot antigo nao pode
+        # dispensar justificativa nem sobrescrever campos de outro perfil.
+        instance = self.Meta.model.objects.select_for_update().get(pk=instance.pk)
+        self.instance = instance
+        validated_data = self.validate(validated_data)
+        campos = self.campos_identificacao_alterados(validated_data)
+        justificativa = validated_data.pop("justificativa_alteracao", None)
+        if "cpf_cifrado" in validated_data and not validated_data["cpf_cifrado"]:
+            instance.cpf_hash = None
+        instance = super().update(instance, validated_data)
+        if campos:
+            responsavel = instance if isinstance(instance, Responsavel) else None
+            AlteracaoCadastral.objects.create(
+                paciente=responsavel.paciente if responsavel else instance,
+                responsavel=responsavel,
+                autor=self.context["request"].user,
+                campos=campos,
+                justificativa=justificativa,
+            )
+        return instance
+
+
+class PacienteSerializer(CadastroProtegidoSerializer):
+    campos_criacao_admin = frozenset(
+        {
+            "clinica",
+            "nome_civil",
+            "nome_social",
+            "cpf",
+            "data_nascimento",
+            "sexo",
+            "nacionalidade",
+            "naturalidade",
+            "endereco_cifrado",
+            "telefone_cifrado",
+        }
+    )
+    campos_atualizacao_admin = campos_criacao_admin | {"justificativa_alteracao"}
+    campos_atualizacao_clinico = frozenset({"nome_social", "status", "data_encerramento"})
+    campos_identificacao = {
+        "nome_civil": "nome_civil",
+        "cpf_cifrado": "cpf",
+        "data_nascimento": "data_nascimento",
+        "sexo": "sexo",
+        "nacionalidade": "nacionalidade",
+        "naturalidade": "naturalidade",
+    }
     idade = serializers.IntegerField(read_only=True)
     eh_menor = serializers.BooleanField(read_only=True)
     nome_apresentacao = serializers.SerializerMethodField()
-    cpf = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    cpf = serializers.CharField(
+        source="cpf_cifrado", write_only=True, required=False, allow_blank=True
+    )
 
     class Meta:
         model = Paciente
@@ -72,6 +157,7 @@ class PacienteSerializer(serializers.ModelSerializer):
             "data_encerramento",
             "criado_em",
             "atualizado_em",
+            "justificativa_alteracao",
         )
         read_only_fields = (
             "id",
@@ -89,24 +175,39 @@ class PacienteSerializer(serializers.ModelSerializer):
     def validate_cpf(self, value):
         if value:
             validar_cpf(value)
-        return value
+        return normalizar_cpf(value) if value else value
 
     def validate_data_nascimento(self, value):
         validar_data_nascimento(value)
         return value
 
-    def create(self, validated_data):
-        cpf = validated_data.pop("cpf", "")
-        instance = super().create(validated_data)
-        if cpf:
-            instance.cpf_cifrado = cpf
-            instance.save()
-        return instance
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if self.instance is not None and "clinica" in attrs:
+            if attrs["clinica"].pk != self.instance.clinica_id:
+                raise serializers.ValidationError({"clinica": "Clinica do paciente e imutavel."})
+        return attrs
 
 
-class ResponsavelSerializer(serializers.ModelSerializer):
-    cpf = serializers.CharField(write_only=True)
-    nome = serializers.CharField(write_only=True)
+class ResponsavelSerializer(CadastroProtegidoSerializer):
+    campos_criacao_admin = frozenset(
+        {
+            "paciente",
+            "nome",
+            "cpf",
+            "vinculo",
+            "telefone_cifrado",
+            "email",
+            "guarda_compartilhada",
+            "eh_responsavel_legal_principal",
+            "comprovante_vinculo_pendente",
+            "ativo",
+        }
+    )
+    campos_atualizacao_admin = campos_criacao_admin | {"justificativa_alteracao"}
+    campos_identificacao = {"nome_cifrado": "nome", "cpf_cifrado": "cpf"}
+    cpf = serializers.CharField(source="cpf_cifrado", write_only=True)
+    nome = serializers.CharField(source="nome_cifrado", write_only=True, max_length=200)
 
     class Meta:
         model = Responsavel
@@ -123,14 +224,16 @@ class ResponsavelSerializer(serializers.ModelSerializer):
             "comprovante_vinculo_pendente",
             "ativo",
             "criado_em",
+            "justificativa_alteracao",
         )
         read_only_fields = ("id", "criado_em")
 
     def validate_cpf(self, value):
         validar_cpf(value)
-        return value
+        return normalizar_cpf(value)
 
     def validate(self, attrs):
+        attrs = super().validate(attrs)
         # O vinculo historico pertence ao paciente original. Para outro paciente,
         # o cadastro deve ser criado pelo fluxo administrativo, sem mover este.
         if self.instance is not None:
@@ -143,7 +246,7 @@ class ResponsavelSerializer(serializers.ModelSerializer):
         # Trocar responsavel legal principal exige descricao do comprovante arquivado
         # (upload real desabilitado ate Lote 5 - ver model)
         if attrs.get("eh_responsavel_legal_principal"):
-            paciente = attrs.get("paciente")
+            paciente = attrs.get("paciente", self.instance.paciente if self.instance else None)
             existe_outro = (
                 Responsavel.objects.filter(
                     paciente=paciente,
@@ -164,15 +267,6 @@ class ResponsavelSerializer(serializers.ModelSerializer):
                     }
                 )
         return attrs
-
-    def create(self, validated_data):
-        nome = validated_data.pop("nome")
-        cpf = validated_data.pop("cpf")
-        instance = Responsavel(**validated_data)
-        instance.nome_cifrado = nome
-        instance.cpf_cifrado = cpf
-        instance.save()
-        return instance
 
 
 class ConsentimentoSerializer(serializers.ModelSerializer):

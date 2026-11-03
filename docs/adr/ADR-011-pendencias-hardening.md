@@ -10,7 +10,10 @@
 e testados nas v0.2.3/v0.2.4; seus relatos históricos de pendência não representam
 o estado atual. A análise STRIDE está documentada em
 `docs/seguranca/STRIDE-lote-3.md`, com riscos, evidências e critérios de saída.
-Separação TI/admin, permissões por campo e os demais controles continuam pendentes.
+As permissões por campo de Paciente/Responsavel e justificativas de identificação
+estão implementadas/testadas na revisão descrita em
+`docs/seguranca/PERMISSOES-CADASTRAIS.md`. Privacidade de texto clínico por categoria
+depende de Registro. Separação TI/admin e os demais controles continuam pendentes.
 Dependabot ainda não foi configurado; não confundir com o pip-audit bloqueante.
 
 Review externa levantou pontos legitimos que nao sao resolvidos em v0.2.2
