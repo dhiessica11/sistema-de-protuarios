@@ -1,0 +1,26 @@
+WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies
+WARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes
+Found 21 known vulnerabilities in 5 packages
+Name                Version ID                  Fix Versions
+------------------- ------- ------------------- ------------
+pytest              8.3.5   PYSEC-2026-1845     9.0.3
+django              5.1.15  PYSEC-2026-3717     5.2.17,6.0.8
+django              5.1.15  PYSEC-2026-4035     5.2.17,6.0.8
+django              5.1.15  GHSA-923m-gv2p-w5qp 5.2.15,6.0.6
+django              5.1.15  GHSA-h7pc-vwp9-298g 5.2.15,6.0.6
+django              5.1.15  GHSA-8cjm-8mp7-r2xf 5.2.15,6.0.6
+django              5.1.15  GHSA-3h9f-r86x-qvjx 5.2.16,6.0.7
+django              5.1.15  GHSA-crhf-3pfg-w68w 5.2.16,6.0.7
+django              5.1.15  GHSA-8qcx-xf44-272x 5.2.16,6.0.7
+pip                 25.0.1  PYSEC-2026-196      26.1.2
+pip                 25.0.1  PYSEC-2026-1795     25.3
+pip                 25.0.1  PYSEC-2026-1796     26.0
+pip                 25.0.1  PYSEC-2026-2875     26.1
+pip                 25.0.1  PYSEC-2026-2876     26.1
+pip                 25.0.1  PYSEC-2026-3721     26.2
+djangorestframework 3.15.2  PYSEC-2026-3827     3.17.2
+djangorestframework 3.15.2  PYSEC-2026-3828     3.17.2
+djangorestframework 3.15.2  GHSA-33wh-fxxf-88vv 3.18.2
+djangorestframework 3.15.2  GHSA-3547-9m27-7rxg 3.18.2
+djangorestframework 3.15.2  GHSA-xw6w-gcfp-cf8m 3.18.2
+pynacl              1.5.0   PYSEC-2026-3002     1.6.2

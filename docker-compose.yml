@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: prontuario-db
+    environment:
+      POSTGRES_DB: prontuario_dev
+      POSTGRES_USER: prontuario
+      POSTGRES_PASSWORD: dev_only_change_in_prod
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d
+    # Postgres NAO exposto no host por padrao (segurança)
+    # Para conectar com DBeaver local, descomente a linha abaixo:
+    # ports:
+    #   - "5432:5432"
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prontuario"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: prontuario-redis
+    # Redis tambem interno. Descomente para dev local se precisar.
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: prontuario-web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+      - ./secrets_dev:/secrets_dev:ro
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: prontuario-worker
+    command: celery -A config worker -l info
+    volumes:
+      - ./backend:/app
+      - ./secrets_dev:/secrets_dev:ro
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:
