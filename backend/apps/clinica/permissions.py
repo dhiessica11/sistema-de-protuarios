@@ -8,7 +8,7 @@ from rest_framework.permissions import BasePermission
 
 
 class IsAdmin(BasePermission):
-    """Usuario tipo admin ou TI."""
+    """Usuario com papel administrativo da clinica."""
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and getattr(request.user, "eh_admin", False)
