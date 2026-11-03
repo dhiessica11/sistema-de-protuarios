@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+.venv-*/
+*.egg-info/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Node
+node_modules/
+dist/
+build/
+
+# Docker
+*.pid
+
+# Secrets (NUNCA commitar)
+secrets/
+secrets_dev/
+*.key
+*.pem
+*.bin
