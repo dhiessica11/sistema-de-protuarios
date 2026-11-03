@@ -3,7 +3,7 @@
 Sistema de prontuário clínico infantil (fonoaudiologia + TO + psicologia).
 Compliance CFFa 777/2025 + LGPD. Single-tenant self-hosted.
 
-**Versão:** 0.2.3 (correções de dependências sobre os Lotes 1 + 2)
+**Versão:** 0.2.4 (dependências e leitura de chaves corrigidas sobre os Lotes 1 + 2)
 **Status:** Em desenvolvimento local, nunca rodou em produção.
 
 ## Pré-validação
@@ -13,8 +13,8 @@ Todos os checks do CI passam localmente:
 - Instalação com hashes de `backend/requirements-dev.lock` e projeto sem nova resolução
 - `python manage.py makemigrations --check --dry-run` → "No changes detected"
 - `ruff check .` → "All checks passed!"
-- `ruff format --check .` → "35 files already formatted"
-- `pytest` → **39 passed** (22 invariantes + 16 autorização + 1 health)
+- `ruff format --check .` → "36 files already formatted"
+- `pytest` → **74 passed** (22 invariantes + 16 autorização + 1 health + 35 leitura de chaves)
 
 ## Requisitos
 
@@ -62,7 +62,7 @@ Abrir no navegador:
 
 ```bash
 docker compose exec web pytest -v
-# Esperado: 39 passed
+# Esperado: 74 passed
 ```
 
 ## Lint
@@ -158,7 +158,7 @@ Rebuild: `docker compose up --build --force-recreate web`.
 ## Status dos lotes
 
 - [x] **Lote 1** — Infra Docker + Django base
-- [x] **Lote 2 (v0.2.2)** — Models core + cifra multi-chave + API v1 + 39 testes
+- [x] **Lote 2 (v0.2.2)** — Models core + cifra multi-chave + API v1 + 74 testes
 - [ ] **Lote 3** — Registro clínico + autoria imutável + retificação + assinatura avançada (gov.br obrigatório)
 - [ ] **Lote 4** — Agenda + faltas + feriados
 - [ ] **Lote 5** — Documentos + upload seguro + ClamAV

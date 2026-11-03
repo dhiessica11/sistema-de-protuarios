@@ -51,7 +51,8 @@ class _KeyRegistry:
         # Prod: Docker secrets em /run/secrets/
         docker_path = Path(f"/run/secrets/prontuario_key_{name.lower()}")
         if docker_path.exists():
-            key = docker_path.read_bytes().strip()
+            # Chaves binarias: whitespace tambem pode ser parte dos 32 bytes.
+            key = docker_path.read_bytes()
         else:
             # Dev: arquivos em secrets_dev/
             dev_dir = Path(settings.BASE_DIR).parent / "secrets_dev"

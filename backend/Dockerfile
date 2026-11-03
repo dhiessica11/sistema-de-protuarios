@@ -6,8 +6,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
     libmagic1 \
     curl \
     && rm -rf /var/lib/apt/lists/*
@@ -15,7 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY requirements-dev.lock ./
-RUN pip install --require-hashes -r requirements-dev.lock
+RUN --mount=type=secret,id=proxy_ca \
+    if [ -f /run/secrets/proxy_ca ]; then export PIP_CERT=/run/secrets/proxy_ca; fi; \
+    pip install --require-hashes -r requirements-dev.lock
 
 COPY . .
 RUN pip install --no-deps --no-build-isolation -e .

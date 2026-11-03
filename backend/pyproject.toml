@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prontuario-ed"
-version = "0.2.3"
+version = "0.2.4"
 description = "Prontuario Eletronico Espaco Desenvolver"
 requires-python = ">=3.12,<3.14"
 # Faixas suportadas; versoes exatas e hashes em requirements-dev.lock.

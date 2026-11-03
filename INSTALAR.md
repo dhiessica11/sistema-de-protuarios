@@ -1,6 +1,6 @@
-# Instalação — v0.2.3
+# Instalação — v0.2.4
 
-**Esta versão foi validada:** 39/39 testes passam, lint limpo, migration sem drift, pip install funciona.
+**Esta versão foi validada:** 74/74 testes passam, lint limpo, migration sem drift, pip install funciona.
 Substitui qualquer download anterior.
 
 ## Pré-requisito
@@ -118,7 +118,7 @@ curl http://localhost:8000/health/
 ### API
 `http://localhost:8000/api/v1/` — lista 6 endpoints.
 
-### Testes — 39 passando
+### Testes — 74 passando
 ```bash
 docker compose exec web pytest -v
 ```
@@ -128,7 +128,7 @@ Esperado:
 test_health.py::test_health_endpoint_returns_200 PASSED
 ... (22 testes de invariantes)
 ... (16 testes de autorização)
-======= 39 passed in X.XXs =======
+======= 74 passed in X.XXs =======
 ```
 
 ### Lint
@@ -137,7 +137,7 @@ docker compose exec web ruff check .
 # All checks passed!
 
 docker compose exec web ruff format --check .
-# 35 files already formatted
+# 36 files already formatted
 ```
 
 ### Migration drift
@@ -181,7 +181,7 @@ Validou tudo? Me diz **"v0.2.2 ok"** → eu começo:
 |---|---|
 | `pip install -e` falhava (setuptools sem config) | `[tool.setuptools]` com packages explícitos |
 | Migration manual divergente | Regenerada pelo Django, versionada |
-| 4 testes falhavam | 39/39 passando |
+| 4 testes falhavam | 74/74 passando |
 | Lint reportava 10 erros + 20 arquivos | 0 erros, 0 arquivos pra reformatar |
 | Permissão de criação avaliada tarde (400 vs 403) | `get_permissions` por action — 403 agora |
 | DELETE retornava 403 em vez de 405 | Removido `SemDelete`, só `http_method_names` |
