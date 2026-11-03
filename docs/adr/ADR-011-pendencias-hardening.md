@@ -5,6 +5,14 @@
 
 ## Contexto
 
+**Atualização em 2026-11-03:** os itens abaixo preservam o registro original de
+2026-11-02. Lockfile, auditoria bloqueante e PostgreSQL/Compose foram implementados
+e testados nas v0.2.3/v0.2.4; seus relatos históricos de pendência não representam
+o estado atual. A análise STRIDE está documentada em
+`docs/seguranca/STRIDE-lote-3.md`, com riscos, evidências e critérios de saída.
+Separação TI/admin, permissões por campo e os demais controles continuam pendentes.
+Dependabot ainda não foi configurado; não confundir com o pip-audit bloqueante.
+
 Review externa levantou pontos legitimos que nao sao resolvidos em v0.2.2
 mas precisam ser rastreados para nao se perderem.
 
