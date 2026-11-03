@@ -1,6 +1,6 @@
 # Instalação — desenvolvimento após v0.2.4
 
-**Esta revisão foi validada:** 180/180 testes passam, lint limpo, migration sem drift, pip install funciona.
+**Esta revisão foi validada:** 191/191 testes passam, lint limpo, migration sem drift, pip install funciona.
 Substitui qualquer download anterior.
 
 ## Pré-requisito
@@ -120,7 +120,7 @@ curl http://localhost:8000/health/
 ### API
 `http://localhost:8000/api/v1/` — lista 6 endpoints.
 
-### Testes — 180 passando
+### Testes — 191 passando
 ```bash
 docker compose exec web pytest -v
 ```
@@ -130,7 +130,7 @@ Esperado:
 test_health.py::test_health_endpoint_returns_200 PASSED
 ... (22 testes de invariantes)
 ... (16 testes de autorização)
-======= 180 passed in X.XXs =======
+======= 191 passed in X.XXs =======
 ```
 
 ### Lint
@@ -139,7 +139,7 @@ docker compose exec web ruff check .
 # All checks passed!
 
 docker compose exec web ruff format --check .
-# 40 files already formatted
+# 44 files already formatted
 ```
 
 ### Migration drift

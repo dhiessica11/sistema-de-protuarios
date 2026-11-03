@@ -18,8 +18,10 @@ class IsProfissionalClinico(BasePermission):
     """Usuario tipo fono, TO ou psico."""
 
     def has_permission(self, request, view):
-        return request.user.is_authenticated and getattr(
-            request.user, "eh_profissional_clinico", False
+        return (
+            request.user.is_authenticated
+            and request.user.is_active
+            and getattr(request.user, "eh_profissional_clinico", False)
         )
 
 
