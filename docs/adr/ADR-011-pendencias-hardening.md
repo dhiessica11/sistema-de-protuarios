@@ -1,5 +1,10 @@
 # ADR-011 — Pendencias de hardening reconhecidas
 
+**Atualização posterior:** a API distingue TI de administração clínica e o Django
+Admin restringe gestão de usuários e escrita em Clínica ao papel administrativo.
+O acesso emergencial auditado, isolamento do banco/infraestrutura e validação de
+MFA continuam pendentes. Ver `docs/seguranca/PERFIL-TI.md`.
+
 **Data:** 2026-11-02
 **Status:** Aceita (lista de debito tecnico ciente)
 
@@ -12,8 +17,9 @@ o estado atual. A análise STRIDE está documentada em
 `docs/seguranca/STRIDE-lote-3.md`, com riscos, evidências e critérios de saída.
 As permissões por campo de Paciente/Responsavel e justificativas de identificação
 estão implementadas/testadas na revisão descrita em
-`docs/seguranca/PERMISSOES-CADASTRAIS.md`. Privacidade de texto clínico por categoria
-depende de Registro. Separação TI/admin e os demais controles continuam pendentes.
+`docs/seguranca/PERMISSOES-CADASTRAIS.md`. A privacidade por categoria foi aplicada
+à lista e ao detalhe de Registro; exportações e tarefas futuras ainda exigem teste.
+O isolamento de infraestrutura e o acesso emergencial continuam pendentes.
 Dependabot ainda não foi configurado; não confundir com o pip-audit bloqueante.
 
 Review externa levantou pontos legitimos que nao sao resolvidos em v0.2.2

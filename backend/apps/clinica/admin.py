@@ -8,7 +8,7 @@ Esses passam pela UI propria com serializers DRF validando.
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models import Clinica, Usuario
+from .models import Clinica, TipoUsuario, Usuario
 
 
 @admin.register(Usuario)
@@ -56,12 +56,52 @@ class UsuarioAdmin(DjangoUserAdmin):
 
     readonly_fields = ("last_login", "date_joined", "tentativas_falhas")
 
+    def has_module_permission(self, request):
+        return getattr(
+            request.user, "tipo", None
+        ) == TipoUsuario.ADMIN and super().has_module_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        return getattr(
+            request.user, "tipo", None
+        ) == TipoUsuario.ADMIN and super().has_view_permission(request, obj)
+
+    def has_add_permission(self, request):
+        return getattr(
+            request.user, "tipo", None
+        ) == TipoUsuario.ADMIN and super().has_add_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return getattr(
+            request.user, "tipo", None
+        ) == TipoUsuario.ADMIN and super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return getattr(
+            request.user, "tipo", None
+        ) == TipoUsuario.ADMIN and super().has_delete_permission(request, obj)
+
 
 @admin.register(Clinica)
 class ClinicaAdmin(admin.ModelAdmin):
     list_display = ("nome", "cnpj", "criado_em")
     search_fields = ("nome", "cnpj")
     readonly_fields = ("id", "criado_em", "atualizado_em")
+
+    def has_add_permission(self, request):
+        return getattr(
+            request.user, "tipo", None
+        ) == TipoUsuario.ADMIN and super().has_add_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return getattr(
+            request.user, "tipo", None
+        ) == TipoUsuario.ADMIN and super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return getattr(
+            request.user, "tipo", None
+        ) == TipoUsuario.ADMIN and super().has_delete_permission(request, obj)
 
 
 # INTENCIONALMENTE NAO REGISTRADO no Admin (ver ADR-005):

@@ -13,7 +13,7 @@ Todos os checks do CI passam localmente:
 - Instalação com hashes de `backend/requirements-dev.lock` e projeto sem nova resolução
 - `python manage.py makemigrations --check --dry-run` → "No changes detected"
 - `ruff check .` → "All checks passed!"
-- `ruff format --check .` → "49 files already formatted"
+- `ruff format --check .` → "nenhuma alteração necessária"
 - `pytest` → todos os testes devem passar
 
 ## Requisitos
@@ -199,3 +199,5 @@ No vault Obsidian em `Memoria Claude/02-Pessoal/prontuario-espaco-desenvolver/`.
 
 Registro, retificação e adendo: [documentação](docs/seguranca/REGISTRO.md).
 Viabilidade da integração obrigatória: [assinatura gov.br](docs/integracoes/govbr-viabilidade.md).
+
+Separação do perfil técnico: [TI e administração](docs/seguranca/PERFIL-TI.md).

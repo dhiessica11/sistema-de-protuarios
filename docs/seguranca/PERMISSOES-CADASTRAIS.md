@@ -26,8 +26,9 @@ valores e vale para PUT e PATCH. Leitura continua limitada ao vínculo ativo da 
 
 Usuário sem vínculo ativo não encontra o cadastro no queryset (404 no detalhe).
 Fono, TO e psicologia têm os mesmos direitos sobre esses dados cadastrais comuns.
-O perfil TI ainda é considerado administrativo por `Usuario.eh_admin`, conforme
-o débito explícito do ADR-011. Esta alteração não implementa a separação TI/admin.
+O perfil TI não é administrativo na API clínica. A restrição de interface não
+isola quem tenha acesso direto ao banco e às chaves; o procedimento emergencial
+auditado continua pendente. Ver `docs/seguranca/PERFIL-TI.md`.
 Responsáveis ainda não têm autenticação/portal: a permissão futura de nome social
 pelo responsável não está implementada nesta etapa.
 
@@ -88,7 +89,7 @@ do ADR-008 será aplicada quando Registro existir, em queryset e serializer:
 | Profissional da mesma categoria | Detalhe apenas com vínculo ativo e ação autorizada |
 | Profissional de outra categoria | Apenas resumo explicitamente compartilhado; detalhe privado não deve sair do servidor |
 | Administração | Permissões de cadastro não concedem autoria, assinatura ou leitura automática do detalhe clínico |
-| TI | Exige a separação de papel e o acesso emergencial previsto; não alegar isolamento enquanto TI for admin |
+| TI | Sem acesso pelo endpoint clínico; acesso emergencial auditado e isolamento de infraestrutura permanecem pendentes |
 
 Testes de lista, detalhe, exportação e tarefas por categoria serão necessários
 com o modelo Registro. Não foi criado um helper sem consumidor para simular essa

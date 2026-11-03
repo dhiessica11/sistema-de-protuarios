@@ -1,6 +1,6 @@
 # Instalação — desenvolvimento após v0.2.4
 
-**Validação:** rode a suíte completa, lint e verificação de migrations nesta revisão.
+**Validação:** execute a suíte, lint e verificação de migrations nesta revisão.
 Substitui qualquer download anterior.
 
 ## Pré-requisito
@@ -89,7 +89,7 @@ docker compose exec web python manage.py migrate
 
 Deve aparecer "OK" em cada migration aplicada.
 
-## Passo 7 — Criar superuser
+## Passo 7 — Criar usuários técnico e administrativo
 
 ```bash
 docker compose exec web python manage.py createsuperuser
@@ -98,6 +98,31 @@ docker compose exec web python manage.py createsuperuser
 - Username: `dhiessica` (ou outro)
 - Email: opcional (pode deixar vazio)
 - Password: mínimo 12 caracteres
+
+`createsuperuser` cria um usuário de TI. Ele não acessa dados clínicos nem
+gerencia usuários pelo Admin. Para inicializar a administração da clínica em
+desenvolvimento, execute no mesmo diretório:
+
+```bash
+docker compose exec web python manage.py shell
+```
+
+No shell do Django, informe uma senha escolhida pela pessoa administradora:
+
+```python
+from getpass import getpass
+from django.contrib.auth.password_validation import validate_password
+from apps.clinica.models import TipoUsuario, Usuario
+nome = input("Username administrativo: ")
+senha = getpass("Senha administrativa: ")
+validate_password(senha, Usuario(username=nome))
+Usuario.objects.create_superuser(username=nome, password=senha, tipo=TipoUsuario.ADMIN)
+del senha
+exit()
+```
+
+Faça isso somente em ambiente autorizado. O acesso ao shell e ao banco é uma
+capacidade privilegiada; não substitui o futuro procedimento de acesso emergencial.
 
 ## Passo 8 — Validar
 
@@ -139,7 +164,7 @@ docker compose exec web ruff check .
 # All checks passed!
 
 docker compose exec web ruff format --check .
-# 49 files already formatted
+# Nenhum arquivo precisa de formatação
 ```
 
 ### Migration drift

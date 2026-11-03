@@ -1,5 +1,9 @@
 # Modelo de ameaças STRIDE — preparação do Lote 3
 
+**Atualização posterior:** TI deixou de ser admin na API; a gestão de usuários no
+Django Admin exige papel administrativo. Acesso direto a infraestrutura e modo
+emergencial auditado continuam pendentes; TH04 não está totalmente encerrada.
+
 **Atualização posterior:** o PostgreSQL rejeita UPDATE/DELETE de registros e
 verifica que a origem de retificação/adendo tem o mesmo paciente e categoria.
 Esses fluxos existem sem assinatura verificável e indicam `sem_assinatura`.

@@ -149,7 +149,7 @@ class Usuario(AbstractUser):
 
     @property
     def eh_admin(self) -> bool:
-        return self.tipo in {TipoUsuario.ADMIN, TipoUsuario.TI}
+        return self.tipo == TipoUsuario.ADMIN
 
     def __str__(self):
         return f"{self.username} ({self.get_tipo_display()})"
