@@ -3,8 +3,8 @@
 Sistema de prontuário clínico infantil (fonoaudiologia + TO + psicologia).
 Compliance CFFa 777/2025 + LGPD. Single-tenant self-hosted.
 
-**Versão:** 0.2.4 (dependências e leitura de chaves corrigidas sobre os Lotes 1 + 2)
-**Status:** Em desenvolvimento local, nunca rodou em produção.
+**Versão-base:** 0.2.4 (dependências e leitura de chaves corrigidas sobre os Lotes 1 + 2)
+**Status:** Em desenvolvimento, nunca rodou em produção. Sobre a v0.2.4: STRIDE e correção de vínculo do responsável em revisão.
 
 ## Pré-validação
 
@@ -13,8 +13,8 @@ Todos os checks do CI passam localmente:
 - Instalação com hashes de `backend/requirements-dev.lock` e projeto sem nova resolução
 - `python manage.py makemigrations --check --dry-run` → "No changes detected"
 - `ruff check .` → "All checks passed!"
-- `ruff format --check .` → "36 files already formatted"
-- `pytest` → **74 passed** (22 invariantes + 16 autorização + 1 health + 35 leitura de chaves)
+- `ruff format --check .` → "37 files already formatted"
+- `pytest` → **78 passed** (22 invariantes + 16 autorização + 1 health + 35 leitura de chaves + 4 vínculo de responsável)
 
 ## Requisitos
 
@@ -62,7 +62,7 @@ Abrir no navegador:
 
 ```bash
 docker compose exec web pytest -v
-# Esperado: 74 passed
+# Esperado: 78 passed
 ```
 
 ## Lint
@@ -158,7 +158,7 @@ Rebuild: `docker compose up --build --force-recreate web`.
 ## Status dos lotes
 
 - [x] **Lote 1** — Infra Docker + Django base
-- [x] **Lote 2 (v0.2.2)** — Models core + cifra multi-chave + API v1 + 74 testes
+- [x] **Lote 2 (v0.2.2)** — Models core + cifra multi-chave + API v1 + 39 testes na entrega original
 - [ ] **Lote 3** — Registro clínico + autoria imutável + retificação + assinatura avançada (gov.br obrigatório)
 - [ ] **Lote 4** — Agenda + faltas + feriados
 - [ ] **Lote 5** — Documentos + upload seguro + ClamAV
@@ -187,5 +187,9 @@ Estado atual de cada item: usar vocabulário objetivo —
 `identificado → decidido → modelado → implementado → testado → validado externamente → em produção`.
 
 ## Documentação técnica completa
+
+Modelo de ameaças e critérios de segurança antes do Lote 3:
+[STRIDE](docs/seguranca/STRIDE-lote-3.md). Inclui riscos ainda pendentes;
+documentação não equivale à implementação dos controles.
 
 No vault Obsidian em `Memoria Claude/02-Pessoal/prontuario-espaco-desenvolver/`.

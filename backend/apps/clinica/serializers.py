@@ -131,6 +131,15 @@ class ResponsavelSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
+        # O vinculo historico pertence ao paciente original. Para outro paciente,
+        # o cadastro deve ser criado pelo fluxo administrativo, sem mover este.
+        if self.instance is not None:
+            paciente = attrs.get("paciente", self.instance.paciente)
+            if paciente.pk != self.instance.paciente_id:
+                raise serializers.ValidationError(
+                    {"paciente": "Nao e permitido alterar o paciente de um responsavel existente."}
+                )
+
         # Trocar responsavel legal principal exige descricao do comprovante arquivado
         # (upload real desabilitado ate Lote 5 - ver model)
         if attrs.get("eh_responsavel_legal_principal"):
