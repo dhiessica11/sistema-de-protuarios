@@ -1,5 +1,11 @@
 # Modelo de ameaças STRIDE — preparação do Lote 3
 
+**Atualização posterior:** o PostgreSQL rejeita UPDATE/DELETE de registros e
+verifica que a origem de retificação/adendo tem o mesmo paciente e categoria.
+Esses fluxos existem sem assinatura verificável e indicam `sem_assinatura`.
+TH06 e TH09 continuam abertos até que assinatura e evidências sejam implementadas;
+TRUNCATE e privilégios do proprietário exigem controles operacionais adicionais.
+
 **Atualização:** Registro foi iniciado após esta análise. Autoria, categoria e
 paciente são protegidos contra UPDATE por trigger PostgreSQL, e lista/detalhe da
 API aplicam visibilidade por categoria. TH05 e TH08 permanecem parcialmente abertos:

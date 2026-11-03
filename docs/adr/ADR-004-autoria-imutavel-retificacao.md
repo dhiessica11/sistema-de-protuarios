@@ -1,5 +1,10 @@
 # ADR-004 — Autoria imutável + retificação cria novo registro
 
+**Atualização:** o vínculo e as validações de retificação/adendo estão implementados
+para revisão, com registros identificados como `sem_assinatura`. Assinatura gov.br
+e confirmação de sua viabilidade para a clínica privada continuam pendentes; não
+considerar a retificação clinicamente finalizada antes de assinatura verificável.
+
 **Data:** 2026-10-24
 **Status:** Aceita
 

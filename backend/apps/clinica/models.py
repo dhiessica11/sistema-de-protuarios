@@ -480,13 +480,50 @@ class PacienteEquipe(AuditedModel):
         return f"{self.paciente} <- {self.profissional}"
 
 
+class TipoRegistro(models.TextChoices):
+    EVOLUCAO = "evolucao", "Evolucao"
+    RETIFICACAO = "retificacao", "Retificacao"
+    ADENDO = "adendo", "Adendo"
+
+
 class Registro(UUIDModel):
     """Registro clinico. Categoria e autor sao definidos pelo servidor."""
 
     paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, related_name="registros")
     autor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="registros")
     categoria = models.CharField(max_length=10, choices=TipoUsuario.choices)
+    tipo = models.CharField(
+        max_length=12, choices=TipoRegistro.choices, default=TipoRegistro.EVOLUCAO
+    )
+    origem = models.ForeignKey(
+        "self", on_delete=models.PROTECT, null=True, blank=True, related_name="derivados"
+    )
+    justificativa = EncryptedTextField(key="A", blank=True)
+    contato_validacao = EncryptedTextField(key="A", blank=True)
     resumo = EncryptedTextField(key="A", blank=True)
     detalhe = EncryptedTextField(key="A")
     compartilhado = models.BooleanField(default=False)
     criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(tipo=TipoRegistro.EVOLUCAO, origem__isnull=True)
+                    | models.Q(
+                        tipo__in=[TipoRegistro.RETIFICACAO, TipoRegistro.ADENDO],
+                        origem__isnull=False,
+                    )
+                ),
+                name="registro_origem_conforme_tipo",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(tipo=TipoRegistro.RETIFICACAO) | ~models.Q(justificativa=""),
+                name="registro_retificacao_justificada",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(tipo=TipoRegistro.RETIFICACAO)
+                | ~models.Q(contato_validacao=""),
+                name="registro_retificacao_com_contato",
+            ),
+        ]

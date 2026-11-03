@@ -1,6 +1,6 @@
 # Instalação — desenvolvimento após v0.2.4
 
-**Esta revisão foi validada:** 191/191 testes passam, lint limpo, migration sem drift, pip install funciona.
+**Validação:** rode a suíte completa, lint e verificação de migrations nesta revisão.
 Substitui qualquer download anterior.
 
 ## Pré-requisito
@@ -120,7 +120,7 @@ curl http://localhost:8000/health/
 ### API
 `http://localhost:8000/api/v1/` — lista 6 endpoints.
 
-### Testes — 191 passando
+### Testes — suíte completa
 ```bash
 docker compose exec web pytest -v
 ```
@@ -130,7 +130,7 @@ Esperado:
 test_health.py::test_health_endpoint_returns_200 PASSED
 ... (22 testes de invariantes)
 ... (16 testes de autorização)
-======= 191 passed in X.XXs =======
+Todos os testes devem passar.
 ```
 
 ### Lint
@@ -139,7 +139,7 @@ docker compose exec web ruff check .
 # All checks passed!
 
 docker compose exec web ruff format --check .
-# 44 files already formatted
+# 49 files already formatted
 ```
 
 ### Migration drift
@@ -173,9 +173,9 @@ docker compose down -v
 
 ## Próximo passo
 
-Validou tudo? Me diz **"v0.2.2 ok"** → eu começo:
-1. Atualização completa do vault (Dec 1 + Dec 2 incorporadas + inconsistências DPO corrigidas)
-2. Lote 3 com assinatura gov.br obrigatória no modelo
+Os fluxos de registro, retificação e adendo ainda estão sem assinatura eletrônica.
+Consulte `docs/integracoes/govbr-viabilidade.md` antes de planejar a integração.
+Não utilize dados reais até os controles do projeto estarem implementados e validados.
 
 ## O que v0.2.2 corrigiu da v0.2.1
 

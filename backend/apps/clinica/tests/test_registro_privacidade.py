@@ -199,3 +199,19 @@ def test_autoria_imutavel_via_sql_postgresql(contexto):
         Registro.objects.filter(pk=registro.pk).update(paciente=outro_paciente)
     registro.refresh_from_db()
     assert registro.paciente_id == paciente.pk
+
+
+def test_conteudo_e_exclusao_protegidos_no_postgresql(contexto):
+    if connection.vendor != "postgresql":
+        pytest.skip("Exige PostgreSQL")
+    paciente, autor, _ = contexto
+    registro = Registro.objects.create(
+        paciente=paciente, autor=autor, categoria=autor.tipo, detalhe="Texto original"
+    )
+    with pytest.raises(DatabaseError), transaction.atomic():
+        Registro.objects.filter(pk=registro.pk).update(detalhe="texto adulterado")
+    with pytest.raises(DatabaseError), transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM clinica_registro WHERE id = %s", [registro.pk])
+    registro.refresh_from_db()
+    assert registro.detalhe == "Texto original"
