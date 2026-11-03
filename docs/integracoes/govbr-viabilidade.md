@@ -4,6 +4,11 @@ Pesquisa inicial: 2026-11-03. Estado: **elegibilidade da clínica privada não
 confirmada**. A decisão de exigir gov.br no v0 permanece; este documento registra
 um risco de acesso técnico, sem substituí-la por outro fornecedor.
 
+A responsável informou que a clínica ainda não possui acesso aprovado ao ambiente
+de homologação. Não há credenciais configuradas no ambiente desta tarefa.
+Existe uma [impressão digital interna experimental](integridade-experimental.md),
+que não é integração nem assinatura e não deve ser usada como evidência.
+
 A página oficial [Assinatura Eletrônica para Órgãos](https://www.gov.br/governodigital/pt-br/identidade/assinatura-eletronica/assinatura-eletronica-para-orgaos/assinatura-eletronica-para-orgaos)
 descreve integração para órgãos públicos e determina que a solicitação seja
 formalizada por agente público. Ela não comprova acesso direto para a clínica
