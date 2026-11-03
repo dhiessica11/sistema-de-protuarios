@@ -1,5 +1,9 @@
 # Validação de Registro: autoria e privacidade
 
+**Atualização posterior:** a migration `0005` também passou a rejeitar UPDATE e
+DELETE do conteúdo no PostgreSQL. A observação contrária abaixo descreve a revisão
+anterior; consulte `retificacao-adendo.md` para o estado e os limites atuais.
+
 Data: 2026-11-03. Base: main após PR #3. Backend montado na imagem de desenvolvimento
 v0.2.4, com PostgreSQL 16 isolado. Foram usados apenas dados sintéticos.
 
