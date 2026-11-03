@@ -1,5 +1,9 @@
 # Permissões de cadastro e fronteira com o Lote 3
 
+**Atualização:** a API inicial de Registro agora aplica o acesso por categoria em
+lista e detalhe. A tabela de Registro ao final registra os requisitos que orientaram
+a implementação; exportação e tarefas clínicas seguem pendentes.
+
 Data: 2026-11-03. Implementação das restrições de escrita em Paciente e Responsavel,
 baseada no ADR-011. A política é verificada no servidor antes da validação de
 valores e vale para PUT e PATCH. Leitura continua limitada ao vínculo ativo da equipe.

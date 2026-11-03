@@ -1,5 +1,7 @@
 # ADR-005 — Admin Django bloqueado para models clínicos
 
+**Atualização:** o model `Registro` também não é registrado no Admin Django.
+
 **Data:** 2026-10-24
 **Status:** Aceita
 

@@ -478,3 +478,15 @@ class PacienteEquipe(AuditedModel):
 
     def __str__(self):
         return f"{self.paciente} <- {self.profissional}"
+
+
+class Registro(UUIDModel):
+    """Registro clinico. Categoria e autor sao definidos pelo servidor."""
+
+    paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, related_name="registros")
+    autor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="registros")
+    categoria = models.CharField(max_length=10, choices=TipoUsuario.choices)
+    resumo = EncryptedTextField(key="A", blank=True)
+    detalhe = EncryptedTextField(key="A")
+    compartilhado = models.BooleanField(default=False)
+    criado_em = models.DateTimeField(auto_now_add=True)

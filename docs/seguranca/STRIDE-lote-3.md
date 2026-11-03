@@ -1,5 +1,11 @@
 # Modelo de ameaças STRIDE — preparação do Lote 3
 
+**Atualização:** Registro foi iniciado após esta análise. Autoria, categoria e
+paciente são protegidos contra UPDATE por trigger PostgreSQL, e lista/detalhe da
+API aplicam visibilidade por categoria. TH05 e TH08 permanecem parcialmente abertos:
+assinatura, acesso por futuras exportações e tarefas e isolamento da role de banco
+ainda precisam ser implementados e verificados.
+
 Data: 2026-11-03. Base revisada: v0.2.4, commit de main
 `b90040fa9663e55d34b69130ef804f58fdba2c41`, CI concluído com sucesso.
 Estado: análise técnica documentada; revisão externa pendente. Não é RIPD,
