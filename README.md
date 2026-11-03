@@ -4,7 +4,7 @@ Sistema de prontuário clínico infantil (fonoaudiologia + TO + psicologia).
 Compliance CFFa 777/2025 + LGPD. Single-tenant self-hosted.
 
 **Versão-base:** 0.2.4 (dependências e leitura de chaves corrigidas sobre os Lotes 1 + 2)
-**Status:** Em desenvolvimento, nunca rodou em produção. Sobre a v0.2.4: STRIDE e correção de vínculo do responsável em revisão.
+**Status:** Em desenvolvimento, nunca rodou em produção. Sobre a v0.2.4: STRIDE integrado; permissões cadastrais e justificativas em revisão.
 
 ## Pré-validação
 
@@ -13,8 +13,8 @@ Todos os checks do CI passam localmente:
 - Instalação com hashes de `backend/requirements-dev.lock` e projeto sem nova resolução
 - `python manage.py makemigrations --check --dry-run` → "No changes detected"
 - `ruff check .` → "All checks passed!"
-- `ruff format --check .` → "37 files already formatted"
-- `pytest` → **78 passed** (22 invariantes + 16 autorização + 1 health + 35 leitura de chaves + 4 vínculo de responsável)
+- `ruff format --check .` → "40 files already formatted"
+- `pytest` → **180 passed** (22 invariantes + 16 autorização + 1 health + 35 leitura de chaves + 4 vínculo de responsável + 102 permissões cadastrais)
 
 ## Requisitos
 
@@ -62,7 +62,7 @@ Abrir no navegador:
 
 ```bash
 docker compose exec web pytest -v
-# Esperado: 78 passed
+# Esperado: 180 passed
 ```
 
 ## Lint
@@ -191,5 +191,8 @@ Estado atual de cada item: usar vocabulário objetivo —
 Modelo de ameaças e critérios de segurança antes do Lote 3:
 [STRIDE](docs/seguranca/STRIDE-lote-3.md). Inclui riscos ainda pendentes;
 documentação não equivale à implementação dos controles.
+
+Permissões de escrita e limites da etapa atual:
+[matriz cadastral](docs/seguranca/PERMISSOES-CADASTRAIS.md).
 
 No vault Obsidian em `Memoria Claude/02-Pessoal/prontuario-espaco-desenvolver/`.

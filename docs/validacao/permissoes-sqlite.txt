@@ -1,0 +1,112 @@
+All checks passed!
+40 files already formatted
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0
+django: version: 5.2.18, settings: config.settings.test (from env)
+rootdir: /app
+configfile: pyproject.toml
+plugins: Faker-28.0.0, django-4.14.0, cov-5.0.0
+collected 180 items
+
+apps/clinica/tests/test_api_permissions.py ................              [  8%]
+apps/clinica/tests/test_cadastro_campos.py ............................. [ 25%]
+........................................................................ [ 65%]
+.                                                                        [ 65%]
+apps/clinica/tests/test_invariantes.py ......................            [ 77%]
+apps/clinica/tests/test_responsavel_vinculo.py ....                      [ 80%]
+apps/core/tests/test_health.py .                                         [ 80%]
+apps/core/tests/test_encryption_keys.py ................................ [ 98%]
+...                                                                      [100%]
+
+=============================== warnings summary ===============================
+apps/clinica/tests/test_api_permissions.py: 9 warnings
+apps/clinica/tests/test_invariantes.py: 2 warnings
+apps/clinica/tests/test_responsavel_vinculo.py: 2 warnings
+  /usr/local/lib/python3.12/site-packages/factory/django.py:182: DeprecationWarning: FonoFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the FonoFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+apps/clinica/tests/test_api_permissions.py::TestProfissionalEscopo::test_fono_sem_vinculo_nao_ve_paciente
+apps/clinica/tests/test_api_permissions.py::TestProfissionalEscopo::test_fono_com_vinculo_ve_seu_paciente
+apps/clinica/tests/test_api_permissions.py::TestAdminAcessoTotal::test_admin_lista_todos_pacientes
+  /usr/local/lib/python3.12/site-packages/rest_framework/pagination.py:198: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'apps.clinica.models.Paciente'> QuerySet.
+    paginator = self.django_paginator_class(queryset, page_size)
+
+apps/clinica/tests/test_api_permissions.py: 7 warnings
+apps/clinica/tests/test_cadastro_campos.py: 21 warnings
+apps/clinica/tests/test_invariantes.py: 2 warnings
+apps/clinica/tests/test_responsavel_vinculo.py: 2 warnings
+  /usr/local/lib/python3.12/site-packages/factory/django.py:182: DeprecationWarning: AdminFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the AdminFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+apps/clinica/tests/test_api_permissions.py::TestVinculoEquipeSoAdmin::test_fono_ve_apenas_seus_vinculos
+  /usr/local/lib/python3.12/site-packages/rest_framework/pagination.py:198: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'apps.clinica.models.PacienteEquipe'> QuerySet.
+    paginator = self.django_paginator_class(queryset, page_size)
+
+apps/clinica/tests/test_cadastro_campos.py: 81 warnings
+apps/clinica/tests/test_invariantes.py: 1 warning
+  /usr/local/lib/python3.12/site-packages/factory/django.py:182: DeprecationWarning: UsuarioFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UsuarioFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform linux, python 3.12.16-final-0 ----------
+Name                                   Stmts   Miss  Cover
+----------------------------------------------------------
+apps/clinica/admin.py                     17      0   100%
+apps/clinica/apps.py                       5      0   100%
+apps/clinica/cadastro_permissions.py      22      3    86%
+apps/clinica/factories.py                 63      0   100%
+apps/clinica/models.py                   224     30    87%
+apps/clinica/permissions.py               30      4    87%
+apps/clinica/serializers.py              141      9    94%
+apps/clinica/urls.py                      10      0   100%
+apps/clinica/views.py                     85     13    85%
+apps/core/apps.py                          5      0   100%
+apps/core/encryption.py                   57      6    89%
+apps/core/fields.py                       33      1    97%
+apps/core/models.py                       36      8    78%
+apps/core/validators.py                   46     13    72%
+config/asgi.py                             4      4     0%
+config/celery.py                           6      0   100%
+config/settings/base.py                   40      0   100%
+config/settings/dev.py                     6      6     0%
+config/settings/prod.py                   17     17     0%
+config/settings/test.py                   12      0   100%
+config/urls.py                             6      0   100%
+config/wsgi.py                             4      4     0%
+----------------------------------------------------------
+TOTAL                                    869    118    86%
+
+Required test coverage of 70% reached. Total coverage: 86.42%
+====================== 180 passed, 131 warnings in 9.89s =======================
+No changes detected
+Operations to perform:
+  Apply all migrations: admin, auth, clinica, contenttypes, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying clinica.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying clinica.0002_alteracaocadastral... OK
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).

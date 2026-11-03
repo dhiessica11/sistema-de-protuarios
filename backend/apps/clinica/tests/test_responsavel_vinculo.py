@@ -33,14 +33,14 @@ def test_troca_de_paciente_rejeitada_sem_alterar_vinculo(perfil):
         format="json",
     )
 
-    assert response.status_code == 400
-    assert "paciente" in response.data
+    assert response.status_code == (400 if perfil == "admin" else 403)
+    assert ("paciente" if perfil == "admin" else "detail") in response.data
     responsavel.refresh_from_db()
     assert responsavel.paciente_id == origem.pk
 
 
 def test_atualizacao_do_mesmo_paciente_continua_permitida():
-    user = FonoFactory()
+    user = AdminFactory()
     paciente = PacienteFactory()
     PacienteEquipeFactory(paciente=paciente, profissional=user)
     responsavel = ResponsavelFactory(paciente=paciente, eh_responsavel_legal_principal=False)

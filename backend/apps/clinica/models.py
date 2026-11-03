@@ -17,7 +17,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.core.fields import EncryptedCharField, HashedField
+from apps.core.fields import EncryptedCharField, EncryptedTextField, HashedField
 from apps.core.models import AuditedModel, TimestampedModel, UUIDModel
 from apps.core.validators import (
     hash_cpf,
@@ -361,6 +361,26 @@ class Responsavel(AuditedModel):
 
     def __str__(self):
         return f"{self.nome_cifrado} ({self.get_vinculo_display()})"
+
+
+# -----------------------------------------------------------------------------
+# JUSTIFICATIVAS DE ALTERACAO CADASTRAL
+# -----------------------------------------------------------------------------
+
+
+class AlteracaoCadastral(UUIDModel):
+    """Justificativa de identificacao; sem endpoint e sem valores antigos/novos."""
+
+    paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, related_name="alteracoes")
+    responsavel = models.ForeignKey(
+        Responsavel, on_delete=models.PROTECT, null=True, blank=True, related_name="alteracoes"
+    )
+    autor = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, related_name="alteracoes_cadastrais"
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+    campos = models.JSONField()
+    justificativa = EncryptedTextField(key="B")
 
 
 # -----------------------------------------------------------------------------

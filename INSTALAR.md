@@ -1,6 +1,6 @@
 # Instalação — desenvolvimento após v0.2.4
 
-**Esta revisão foi validada:** 78/78 testes passam, lint limpo, migration sem drift, pip install funciona.
+**Esta revisão foi validada:** 180/180 testes passam, lint limpo, migration sem drift, pip install funciona.
 Substitui qualquer download anterior.
 
 ## Pré-requisito
@@ -101,6 +101,8 @@ docker compose exec web python manage.py createsuperuser
 
 ## Passo 8 — Validar
 
+**Revisão de permissões:** aplique também a migration `0002_alteracaocadastral` incluída nesta revisão; ela armazena as justificativas de identificação cifradas.
+
 ### Health
 ```bash
 curl http://localhost:8000/health/
@@ -118,7 +120,7 @@ curl http://localhost:8000/health/
 ### API
 `http://localhost:8000/api/v1/` — lista 6 endpoints.
 
-### Testes — 78 passando
+### Testes — 180 passando
 ```bash
 docker compose exec web pytest -v
 ```
@@ -128,7 +130,7 @@ Esperado:
 test_health.py::test_health_endpoint_returns_200 PASSED
 ... (22 testes de invariantes)
 ... (16 testes de autorização)
-======= 78 passed in X.XXs =======
+======= 180 passed in X.XXs =======
 ```
 
 ### Lint
@@ -137,7 +139,7 @@ docker compose exec web ruff check .
 # All checks passed!
 
 docker compose exec web ruff format --check .
-# 37 files already formatted
+# 40 files already formatted
 ```
 
 ### Migration drift

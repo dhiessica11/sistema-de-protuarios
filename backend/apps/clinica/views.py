@@ -6,7 +6,8 @@ Autorizacao em apps/clinica/permissions.py.
 Regras:
 - DELETE bloqueado via http_method_names (retorna 405)
 - Permissoes avaliadas por action (get_permissions)
-- Admin cria/altera; profissional vinculado le e atualiza no seu escopo
+- Admin cadastra/edita identificacao e contatos; profissional vinculado edita
+  nome social, status e encerramento do paciente; responsavel e so leitura para clinicos
 - Consentimento imutavel apos criacao (so GET/POST)
 """
 
@@ -49,8 +50,8 @@ class UsuarioViewSet(viewsets.ReadOnlyModelViewSet):
 
 class PacienteViewSet(viewsets.ModelViewSet):
     """
-    - Admin: cria, le e atualiza qualquer paciente
-    - Profissional vinculado: le e atualiza so os seus
+    - Admin: cadastra e altera campos administrativos/identificacao
+    - Profissional vinculado: altera nome social/status/encerramento dos seus pacientes
     - DELETE: 405 (http_method_names)
     """
 
@@ -106,6 +107,9 @@ class ResponsavelViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(criado_por=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(atualizado_por=self.request.user)
 
 
 class ConsentimentoViewSet(viewsets.ModelViewSet):
