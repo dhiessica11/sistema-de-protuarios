@@ -20,7 +20,10 @@ estão implementadas/testadas na revisão descrita em
 `docs/seguranca/PERMISSOES-CADASTRAIS.md`. A privacidade por categoria foi aplicada
 à lista e ao detalhe de Registro; exportações e tarefas futuras ainda exigem teste.
 O isolamento de infraestrutura e o acesso emergencial continuam pendentes.
-Dependabot ainda não foi configurado; não confundir com o pip-audit bloqueante.
+Dependabot está configurado para GitHub Actions e a imagem-base do Dockerfile,
+com operação dependente da configuração estar na branch padrão. A cobertura do
+lock Python e das imagens do Compose não foi estabelecida; o pip-audit bloqueante
+continua sendo necessário e não atualiza dependências automaticamente.
 
 Review externa levantou pontos legitimos que nao sao resolvidos em v0.2.2
 mas precisam ser rastreados para nao se perderem.
