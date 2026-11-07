@@ -11,15 +11,14 @@ informa que o acesso à integração é concedido apenas a sistemas de serviço 
 após análise individual, e que a solicitação deve ser formalizada por agente público.
 Isso torna a integração direta de um prontuário de clínica privada um risco concreto
 de inviabilidade. Não foi confirmada uma exceção ou via indireta aplicável ao caso;
-não presumir que ela exista. A possibilidade jurídica e operacional de qualquer
-alternativa precisa ser confirmada antes de alterar a decisão de produto.
+não presumir que ela exista. A possibilidade jurídica e operacional da solução escolhida ainda precisa ser
+confirmada para cada profissão e tipo de documento.
 
 O [art. 6º da Resolução CFFa nº 777/2025](https://www.fonoaudiologia.org.br/resolucoes/resolucoes_html/CFFa_N_777_25.htm)
 aceita assinatura eletrônica avançada **ou** qualificada para documentos ou
 prontuários eletrônicos subscritos por fonoaudiólogos; o texto não exige gov.br
-nominalmente. A escolha obrigatória por gov.br é uma decisão do projeto. A eventual
-adoção de outro meio exigiria nova decisão e análise jurídica, inclusive para CFP
-e COFFITO, ainda pendente.
+nominalmente. A escolha anterior por gov.br foi substituída pela decisão de
+adotar ICP-Brasil. A análise jurídica, inclusive para CFP e COFFITO, segue pendente.
 
 A responsável informou que a clínica ainda não possui acesso aprovado ao ambiente
 de homologação. Não há credenciais configuradas no ambiente desta tarefa.
