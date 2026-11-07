@@ -207,6 +207,7 @@ Permissões de escrita e limites da etapa atual:
 No vault Obsidian em `Memoria Claude/02-Pessoal/prontuario-espaco-desenvolver/`.
 
 Registro, retificação e adendo: [documentação](docs/seguranca/REGISTRO.md).
+Avaliações fonoaudiológicas: [requisitos a partir das planilhas](docs/clinica/avaliacoes-fono.md).
 Decisão e requisitos para a futura [assinatura ICP-Brasil](docs/integracoes/assinatura-icp-brasil.md).
 
 Separação do perfil técnico: [TI e administração](docs/seguranca/PERFIL-TI.md).
