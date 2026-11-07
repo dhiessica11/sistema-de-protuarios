@@ -12,7 +12,7 @@ def instalar(apps, schema_editor):
         DECLARE paciente_anterior uuid;
         BEGIN
             IF NEW.corrige_id IS NOT NULL THEN
-                EXECUTE format('SELECT paciente_id FROM %I WHERE id = $1', TG_TABLE_NAME)
+                EXECUTE format('SELECT paciente_id FROM %%I WHERE id = $1', TG_TABLE_NAME)
                     INTO paciente_anterior USING NEW.corrige_id;
                 IF paciente_anterior IS NULL OR paciente_anterior IS DISTINCT FROM NEW.paciente_id THEN
                     RAISE EXCEPTION 'Correção deve pertencer ao mesmo paciente';
