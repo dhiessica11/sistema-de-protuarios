@@ -15,6 +15,14 @@
 <label for="observacoes-avaliacao">Observações</label><textarea id="observacoes-avaliacao" rows="2" maxlength="5000"></textarea>
 <button class="principal" type="submit">Salvar avaliação</button><p id="mensagem-avaliacao" role="status"></p></form>
 <h3>Histórico e propostas</h3><div id="historico-avaliacoes" aria-live="polite"></div><nav id="paginas-avaliacoes" class="paginacao" aria-label="Paginação de avaliações"></nav>
-</section>{% endif %}
+</section>
+<section id="planos-fono" class="painel avaliacao" hidden>
+<span class="rotulo">PLANEJAMENTO · TESTES</span><h2>Plano terapêutico</h2><p class="ajuda">Selecione objetivos aprovados na página atual de avaliações e descreva uma meta para cada um. Uma versão salva não altera os planos anteriores.</p>
+<form id="form-plano">{% csrf_token %}<label for="inicio-plano">Início</label><input id="inicio-plano" type="date" required><label for="fim-plano">Fim</label><input id="fim-plano" type="date" required>
+<fieldset><legend>Objetivos aprovados</legend><div id="objetivos-plano">Selecione um paciente.</div></fieldset>
+<label for="recursos-plano">Recursos</label><textarea id="recursos-plano" maxlength="5000"></textarea>
+<label for="orientacoes-plano">Orientações</label><textarea id="orientacoes-plano" maxlength="5000"></textarea>
+<button class="principal" type="submit">Salvar plano de teste</button><p id="mensagem-plano" role="status"></p></form>
+<h3>Histórico de planos</h3><div id="historico-planos" aria-live="polite"></div><nav id="paginas-planos" class="paginacao" aria-label="Paginação de planos"></nav></section>{% endif %}
 <div id="config-web" data-clinico="{% if clinico %}true{% else %}false{% endif %}" data-fono="{% if fono %}true{% else %}false{% endif %}"></div><script src="{% static 'clinica/web.js' %}" defer></script>
 {% endblock %}

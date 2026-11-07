@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from . import views
 from .avaliacao_fono_api import AvaliacaoViewSet, RevisaoViewSet
+from .plano_fono_api import PlanoViewSet
 from .registro_api import RegistroViewSet
 
 router = DefaultRouter()
@@ -17,6 +18,7 @@ router.register("paciente-equipe", views.PacienteEquipeViewSet, basename="pacien
 router.register("registros", RegistroViewSet, basename="registro")
 
 router.register("avaliacoes-fono", AvaliacaoViewSet, basename="avaliacao-fono")
+router.register("planos-fono", PlanoViewSet, basename="plano-fono")
 
 urlpatterns = [
     path(

@@ -566,3 +566,35 @@ class RevisaoObjetivoFono(UUIDModel):
     )
     texto = EncryptedTextField(key="A")
     criado_em = models.DateTimeField(auto_now_add=True)
+
+
+class PlanoFono(UUIDModel):
+    """Versão imutável de plano de teste, ainda sem assinatura."""
+
+    paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, related_name="planos_fono")
+    autor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="planos_fono")
+    inicio = models.DateField()
+    fim = models.DateField()
+    recursos = EncryptedTextField(key="A", blank=True)
+    orientacoes = EncryptedTextField(key="A", blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(fim__gte=models.F("inicio")), name="plano_fono_periodo_valido"
+            )
+        ]
+
+
+class ItemPlanoFono(UUIDModel):
+    plano = models.ForeignKey(PlanoFono, on_delete=models.PROTECT, related_name="itens")
+    revisao = models.ForeignKey(
+        RevisaoObjetivoFono, on_delete=models.PROTECT, related_name="itens_plano"
+    )
+    meta = EncryptedTextField(key="A")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["plano", "revisao"], name="plano_fono_revisao_unica")
+        ]

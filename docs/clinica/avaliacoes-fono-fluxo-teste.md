@@ -10,8 +10,8 @@ A fonoaudióloga informa o protocolo, data, eventuais observações e zero ou ma
 dificuldades (uma por linha). Cada dificuldade gera um rascunho textual que solicita
 definição de um objetivo. Esse rascunho não é orientação clínica nem objetivo
 aprovado. A profissional pode registrar uma decisão de aprovação ou de não inclusão
-com seu próprio texto; decisões posteriores são adicionadas ao histórico. Ainda não
-existe plano terapêutico formal, metas, priorização ou assinatura.
+com seu próprio texto; decisões posteriores são adicionadas ao histórico. Planos de teste permitem selecionar revisões aprovadas, informar metas e período,
+recursos e orientações. Não há priorização, plano clinicamente finalizado nem assinatura.
 
 Uma reavaliação referencia uma avaliação anterior do mesmo paciente e protocolo,
 com data igual ou posterior. O seletor apresenta as avaliações da página atual do
@@ -24,5 +24,9 @@ alteração ou exclusão das avaliações, dificuldades e decisões. Em PostgreS
 trigger bloqueia UPDATE e DELETE dessas tabelas; SQLite não aplica essa proteção,
 e superusuários ou proprietários do banco podem desativar triggers. O controle de
 origem no PostgreSQL verifica paciente e data; a conferência do protocolo é na API.
+Planos e itens são preservados no PostgreSQL; cada item mantém a revisão que o
+fundamentou. Novos planos exigem a última revisão aprovada de cada dificuldade. O
+seletor apresenta objetivos aprovados da página atual de avaliações. Novas revisões
+não alteram planos anteriores.
 Não há importação de planilhas, classificação, cálculo de normas ou avaliação de
 instrumentos validados. As bases de dados de desenvolvimento não são de produção.

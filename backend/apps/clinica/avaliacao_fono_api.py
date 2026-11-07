@@ -181,6 +181,7 @@ class RevisaoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return RevisaoObjetivoFono.objects.none()
 
+    @transaction.atomic
     def perform_create(self, serializer):
         dificuldade = DificuldadeFono.objects.filter(
             pk=self.kwargs["dificuldade_pk"],
@@ -189,4 +190,5 @@ class RevisaoViewSet(viewsets.ModelViewSet):
         ).first()
         if dificuldade is None:
             raise Http404
+        dificuldade = DificuldadeFono.objects.select_for_update().get(pk=dificuldade.pk)
         serializer.save(autor=self.request.user, dificuldade=dificuldade)

@@ -8,6 +8,7 @@
   const fono = document.querySelector('#config-web').dataset.fono === 'true';
   const areaAvaliacao = document.querySelector('#avaliacoes-fono');
   let consultaAvaliacao = 0;
+  let consultaPlano = 0;
   let selecionado = null;
   let requisicao = 0;
 
@@ -59,7 +60,7 @@
       return;
     }
     carregarRegistros();
-    if (fono) { document.querySelector('#form-avaliacao').reset(); document.querySelector('#mensagem-avaliacao').textContent = ''; areaAvaliacao.hidden = false; carregarAvaliacoes(); }
+    if (fono) { document.querySelector('#form-avaliacao').reset(); document.querySelector('#mensagem-avaliacao').textContent = ''; areaAvaliacao.hidden = false; document.querySelector('#planos-fono').hidden = false; document.querySelector('#form-plano').reset(); document.querySelector('#mensagem-plano').textContent = ''; carregarAvaliacoes(); carregarPlanos(); }
   }
   async function carregarRegistros(pagina = 1) {
     const atual = ++requisicao;
@@ -95,6 +96,8 @@
     const origem = document.querySelector('#origem-avaliacao');
     historico.textContent = 'Carregando avaliações…';
     origem.replaceChildren(new Option('Avaliação inicial', ''));
+    const opcoesPlano = document.querySelector('#objetivos-plano');
+    opcoesPlano.replaceChildren();
     try {
       const dados = await obter(`/api/v1/avaliacoes-fono/?paciente=${encodeURIComponent(selecionado.id)}&page=${encodeURIComponent(pagina)}`);
       if (atual !== consultaAvaliacao) return;
@@ -112,6 +115,15 @@
           item.append(elemento('strong', `Dificuldade: ${dificuldade.descricao}`));
           item.append(elemento('p', `Proposta inicial: ${dificuldade.proposta}`));
           const lista = dificuldade.revisoes;
+          const ultima = lista[lista.length - 1];
+          if (ultima && ultima.decisao === 'aprovado') {
+            const linha = elemento('div', '', 'opcao-plano');
+            const label = elemento('label', '', 'opcao-label');
+            const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = ultima.id;
+            label.append(checkbox, document.createTextNode(` ${ultima.texto}`));
+            const meta = document.createElement('textarea'); meta.rows = 2; meta.maxLength = 2000; meta.placeholder = 'Meta para este objetivo'; meta.setAttribute('aria-label', `Meta: ${ultima.texto}`);
+            linha.append(label, meta); opcoesPlano.append(linha);
+          }
           for (const revisao of lista) item.append(elemento('p', `${revisao.decisao === 'aprovado' ? 'Aprovado' : 'Não incluído'}: ${revisao.texto}`, 'meta'));
           if (!lista.length) item.append(elemento('p', 'Pendente de revisão', 'assinatura'));
           const texto = document.createElement('textarea'); texto.rows = 2; texto.maxLength = 2000;
@@ -132,6 +144,7 @@
         }
         historico.append(bloco);
       }
+      if (!opcoesPlano.children.length) opcoesPlano.append(elemento('p', 'Nenhum objetivo aprovado nesta página.', 'ajuda'));
       paginar(nav, dados, carregarAvaliacoes);
     } catch (erro) { if (atual === consultaAvaliacao) historico.textContent = erro.message; }
   }
@@ -150,6 +163,46 @@
     const dados = {paciente: pacienteId, protocolo: document.querySelector('#protocolo').value, data: document.querySelector('#data-avaliacao').value, origem: document.querySelector('#origem-avaliacao').value || null, dificuldades_informadas: dificuldades, observacoes: document.querySelector('#observacoes-avaliacao').value};
     mensagem.textContent = ''; botao.disabled = true;
     try { await enviar('/api/v1/avaliacoes-fono/', dados); if (selecionado.id === pacienteId) { formulario.reset(); mensagem.textContent = 'Avaliação salva. Revise as propostas no histórico.'; await carregarAvaliacoes(); } }
+    catch (erro) { mensagem.textContent = erro.message; }
+    finally { botao.disabled = false; }
+  });
+  async function carregarPlanos(pagina = 1) {
+    const atual = ++consultaPlano;
+    const historico = document.querySelector('#historico-planos');
+    const nav = document.querySelector('#paginas-planos');
+    historico.textContent = 'Carregando planos…';
+    try {
+      const dados = await obter(`/api/v1/planos-fono/?paciente=${encodeURIComponent(selecionado.id)}&page=${encodeURIComponent(pagina)}`);
+      if (atual !== consultaPlano) return;
+      historico.replaceChildren();
+      if (!dados.results.length) historico.append(elemento('p', 'Nenhum plano cadastrado.', 'ajuda'));
+      for (const plano of dados.results) {
+        const bloco = elemento('article', '', 'registro');
+        bloco.append(elemento('h4', `Plano de ${plano.inicio} até ${plano.fim}`));
+        bloco.append(elemento('span', 'Sem assinatura', 'assinatura'));
+        for (const item of plano.itens) {
+          bloco.append(elemento('p', `Dificuldade: ${item.dificuldade}`));
+          bloco.append(elemento('p', `Objetivo: ${item.objetivo}`));
+          bloco.append(elemento('p', `Meta: ${item.meta}`));
+        }
+        if (plano.recursos) bloco.append(elemento('p', `Recursos: ${plano.recursos}`));
+        if (plano.orientacoes) bloco.append(elemento('p', `Orientações: ${plano.orientacoes}`));
+        historico.append(bloco);
+      }
+      paginar(nav, dados, carregarPlanos);
+    } catch (erro) { if (atual === consultaPlano) historico.textContent = erro.message; }
+  }
+  if (fono) document.querySelector('#form-plano').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    const form = evento.currentTarget;
+    const mensagem = document.querySelector('#mensagem-plano');
+    const botao = form.querySelector('button[type=submit]');
+    const pacienteId = selecionado.id;
+    const itens = Array.from(document.querySelectorAll('.opcao-plano')).filter(el => el.querySelector('input').checked).map(el => ({revisao: el.querySelector('input').value, meta: el.querySelector('textarea').value.trim()}));
+    if (!itens.length || itens.some(item => !item.meta)) { mensagem.textContent = 'Selecione ao menos um objetivo e informe uma meta para cada um.'; return; }
+    const dados = {paciente: pacienteId, inicio: document.querySelector('#inicio-plano').value, fim: document.querySelector('#fim-plano').value, recursos: document.querySelector('#recursos-plano').value, orientacoes: document.querySelector('#orientacoes-plano').value, itens_informados: itens};
+    mensagem.textContent = ''; botao.disabled = true;
+    try { await enviar('/api/v1/planos-fono/', dados); if (selecionado.id === pacienteId) { form.reset(); mensagem.textContent = 'Plano de teste salvo sem assinatura.'; await carregarPlanos(); } }
     catch (erro) { mensagem.textContent = erro.message; }
     finally { botao.disabled = false; }
   });
