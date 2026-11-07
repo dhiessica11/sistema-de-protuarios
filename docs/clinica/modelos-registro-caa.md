@@ -80,8 +80,13 @@ itens e cenários sintéticos, sem transcrever o conteúdo protegido para o cód
 
 O projeto possui fluxos experimentais de avaliação por texto, propostas
 revisáveis, planos com metas e sessões por tentativa para dados fictícios. Ainda
-não implementa os itens DAGG-3, suas escalas de apoio, pontuação ou indicadores,
-gráficos, impressão destes formulários ou integração com as planilhas. O módulo de assinatura
+agora apresenta evolução diária por objetivo para sessões de tentativas, em períodos
+de até 366 dias e até 1000 sessões. Os percentuais de cada dia usam o total das
+tentativas registradas naquele dia, não a média dos percentuais das sessões. Dias
+com sessões sem tentativas mostram dados ausentes; não são gerados dias sem sessão.
+A visualização não determina aquisição ou diagnóstico. Ainda não implementa itens
+DAGG-3, suas escalas, indicadores de CAA, impressão dos formulários ou integração
+com as planilhas. O módulo de assinatura
 ICP-Brasil e os controles para produção continuam pendentes.
 
 A interface de sessões apresenta objetivos dos planos na página atual do histórico
@@ -90,6 +95,7 @@ fonoaudióloga vinculada ao paciente; a assinatura é informada como ausente. Te
 e tentativas são cifrados. SQLite não aplica as triggers; owner ou superusuário do
 PostgreSQL pode desativá-las. A interface e API estão restritas ao desenvolvimento.
 
-Próximo incremento: validar CAA, suas regras e licenças com a responsável e
-desenvolver acompanhamento longitudinal, gráficos e relatórios sem apresentar
-critérios de aquisição como diagnósticos.
+Próximos incrementos: validar CAA, suas regras e licenças com a responsável e
+desenvolver seus indicadores e relatórios, sem apresentar critérios de aquisição
+como diagnósticos. Na visualização atual, somente objetivos da página atual de
+planos são listados; a mudança de objetivo ou período limpa os resultados anteriores.

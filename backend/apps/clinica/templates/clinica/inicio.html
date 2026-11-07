@@ -34,6 +34,14 @@
 <label for="observacoes-sessao">Observações</label><textarea id="observacoes-sessao" maxlength="5000"></textarea>
 <button class="principal" type="submit">Salvar sessão de teste</button><p id="mensagem-sessao" role="status"></p></form>
 <h3>Histórico de sessões</h3><div id="historico-sessoes" aria-live="polite"></div><nav id="paginas-sessoes" class="paginacao" aria-label="Paginação de sessões"></nav>
+</section>
+<section id="evolucao-fono" class="painel avaliacao" hidden>
+<span class="rotulo">ACOMPANHAMENTO · TESTES</span><h2>Evolução por objetivo</h2>
+<p class="ajuda">Escolha um objetivo e um período para ver os resultados por dia. Os percentuais são descritivos e usam as tentativas registradas, sem indicar diagnóstico ou aquisição.</p>
+<form id="form-evolucao"><label for="objetivo-evolucao">Objetivo do plano</label><select id="objetivo-evolucao" required><option value="">Selecione um objetivo</option></select>
+<label for="inicio-evolucao">Início do período</label><input id="inicio-evolucao" type="date" required><label for="fim-evolucao">Fim do período</label><input id="fim-evolucao" type="date" required>
+<button class="principal" type="submit">Ver evolução</button></form>
+<div id="resultado-evolucao" aria-live="polite"><p class="ajuda">Selecione um paciente e um objetivo.</p></div>
 </section>{% endif %}
 <div id="config-web" data-clinico="{% if clinico %}true{% else %}false{% endif %}" data-fono="{% if fono %}true{% else %}false{% endif %}"></div><script src="{% static 'clinica/web.js' %}" defer></script>
 {% endblock %}

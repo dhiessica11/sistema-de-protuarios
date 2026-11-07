@@ -10,6 +10,7 @@
   let consultaAvaliacao = 0;
   let consultaPlano = 0;
   let consultaSessao = 0;
+  let consultaEvolucao = 0;
   let selecionado = null;
   let requisicao = 0;
 
@@ -61,7 +62,7 @@
       return;
     }
     carregarRegistros();
-    if (fono) { document.querySelector('#form-avaliacao').reset(); document.querySelector('#mensagem-avaliacao').textContent = ''; areaAvaliacao.hidden = false; document.querySelector('#planos-fono').hidden = false; document.querySelector('#form-plano').reset(); document.querySelector('#mensagem-plano').textContent = ''; document.querySelector('#sessoes-fono').hidden = false; document.querySelector('#form-sessao').reset(); document.querySelector('#tentativas-sessao').replaceChildren(); document.querySelector('#mensagem-sessao').textContent = ''; carregarAvaliacoes(); carregarPlanos(); carregarSessoes(); }
+    if (fono) { document.querySelector('#form-avaliacao').reset(); document.querySelector('#mensagem-avaliacao').textContent = ''; areaAvaliacao.hidden = false; document.querySelector('#planos-fono').hidden = false; document.querySelector('#form-plano').reset(); document.querySelector('#mensagem-plano').textContent = ''; document.querySelector('#sessoes-fono').hidden = false; document.querySelector('#evolucao-fono').hidden = false; document.querySelector('#form-evolucao').reset(); document.querySelector('#resultado-evolucao').textContent = 'Selecione um objetivo e um período.'; consultaEvolucao++;  document.querySelector('#form-sessao').reset(); document.querySelector('#tentativas-sessao').replaceChildren(); document.querySelector('#mensagem-sessao').textContent = ''; carregarAvaliacoes(); carregarPlanos(); carregarSessoes(); }
   }
   async function carregarRegistros(pagina = 1) {
     const atual = ++requisicao;
@@ -174,6 +175,10 @@
     historico.textContent = 'Carregando planos…';
     const objetivoSessao = document.querySelector('#objetivo-sessao');
     objetivoSessao.replaceChildren(new Option('Sem objetivo vinculado', ''));
+    const objetivoEvolucao = document.querySelector('#objetivo-evolucao');
+    objetivoEvolucao.replaceChildren(new Option('Selecione um objetivo', ''));
+    consultaEvolucao++;
+    document.querySelector('#resultado-evolucao').textContent = 'Selecione um objetivo e um período.';
     try {
       const dados = await obter(`/api/v1/planos-fono/?paciente=${encodeURIComponent(selecionado.id)}&page=${encodeURIComponent(pagina)}`);
       if (atual !== consultaPlano) return;
@@ -185,6 +190,7 @@
         bloco.append(elemento('span', 'Sem assinatura', 'assinatura'));
         for (const item of plano.itens) {
           objetivoSessao.append(new Option(`${plano.inicio} · ${item.objetivo}`, item.id));
+          objetivoEvolucao.append(new Option(`${plano.inicio} · ${item.objetivo}`, item.id));
           bloco.append(elemento('p', `Dificuldade: ${item.dificuldade}`));
           bloco.append(elemento('p', `Objetivo: ${item.objetivo}`));
           bloco.append(elemento('p', `Meta: ${item.meta}`));
@@ -257,6 +263,44 @@
     try { await enviar('/api/v1/sessoes-fono/', dados); if (selecionado.id === pacienteId) { form.reset(); document.querySelector('#tentativas-sessao').replaceChildren(); mensagem.textContent = 'Sessão de teste salva sem assinatura.'; await carregarSessoes(); } }
     catch (erro) { mensagem.textContent = erro.message; }
     finally { botao.disabled = false; }
+  });
+  if (fono) for (const id of ['#objetivo-evolucao', '#inicio-evolucao', '#fim-evolucao']) document.querySelector(id).addEventListener('change', () => {
+    consultaEvolucao++;
+    document.querySelector('#resultado-evolucao').textContent = 'Selecione Ver evolução para atualizar os resultados.';
+  });
+  if (fono) document.querySelector('#form-evolucao').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    const resultado = document.querySelector('#resultado-evolucao');
+    const paciente = selecionado.id;
+    const objetivo = document.querySelector('#objetivo-evolucao').value;
+    const inicio = document.querySelector('#inicio-evolucao').value;
+    const fim = document.querySelector('#fim-evolucao').value;
+    const atual = ++consultaEvolucao;
+    const params = new URLSearchParams({paciente, objetivo, inicio, fim});
+    resultado.textContent = 'Carregando evolução…';
+    try {
+      const dados = await obter(`/api/v1/sessoes-fono/evolucao/?${params}`);
+      if (atual !== consultaEvolucao) return;
+      resultado.replaceChildren();
+      if (!dados.pontos.length) { resultado.append(elemento('p', 'Nenhuma sessão registrada para este objetivo no período.', 'ajuda')); return; }
+      for (const ponto of dados.pontos) {
+        const bloco = elemento('article', '', 'registro');
+        const data = ponto.data.split('-').reverse().join('/');
+        bloco.append(elemento('strong', `${data} · ${ponto.sessoes} sessão(ões) · ${ponto.total} tentativa(s)`));
+        if (!ponto.total) {
+          bloco.append(elemento('p', 'Sem tentativas registradas: sem dados para percentuais.', 'ajuda'));
+        } else {
+          for (const [titulo, total, percentual, classe] of [['Independentes', ponto.independentes, ponto.percentual_independentes, 'independente'], ['Com ajuda', ponto.ajudas, ponto.percentual_ajudas, 'ajuda-grafico'], ['Erros', ponto.erros, ponto.percentual_erros, 'erro-grafico']]) {
+            bloco.append(elemento('p', `${titulo}: ${total} de ${ponto.total} (${percentual}%)`, 'meta'));
+            const trilho = elemento('div', '', 'barra-trilho');
+            trilho.setAttribute('aria-hidden', 'true');
+            const barra = elemento('div', '', `barra ${classe}`); barra.style.width = `${percentual}%`;
+            trilho.append(barra); bloco.append(trilho);
+          }
+        }
+        resultado.append(bloco);
+      }
+    } catch (erro) { if (atual === consultaEvolucao) resultado.textContent = 'Não foi possível carregar a evolução. Confira o período de até 366 dias e tente novamente.'; }
   });
   carregarPacientes();
 })();

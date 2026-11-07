@@ -65,7 +65,8 @@ vê texto clínico, e TI não acessa essa tela. Profissionais de fono vinculados
 criar avaliações de teste, registrar dificuldades e revisar as propostas geradas.
 Reavaliações são vinculadas a uma avaliação anterior do mesmo protocolo. A área de
 planejamento permite salvar planos de teste com metas para objetivos aprovados.
-Sessões de teste permitem registrar tentativas e visualizar seus percentuais. A
+Sessões de teste permitem registrar tentativas e visualizar seus percentuais; a
+evolução por objetivo apresenta resultados diários em períodos de até 366 dias. A
 interface ainda não possui cadastro de pacientes, criação de registros clínicos ou assinatura. Ela só está habilitada nas configurações
 de desenvolvimento e não autoriza o uso com dados reais. Na rede local de testes,
 use o endereço do servidor na porta 8000; não exponha o servidor de desenvolvimento

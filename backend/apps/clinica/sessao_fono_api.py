@@ -1,12 +1,16 @@
 """Registro experimental de tentativas, sem interpretação clínica."""
 
 import json
+from datetime import date
 from uuid import UUID
 
+from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework import serializers, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from .avaliacao_fono_api import FonoEmTeste
 from .models import ItemPlanoFono, Paciente, SessaoFono
@@ -129,6 +133,70 @@ class SessaoViewSet(viewsets.ModelViewSet):
             queryset.filter(paciente_id=self.paciente_id)
             if hasattr(self, "paciente_id")
             else queryset
+        )
+
+    @action(detail=False, methods=["get"], url_path="evolucao")
+    def evolucao(self, request):
+        try:
+            paciente = UUID(request.query_params.get("paciente", ""))
+            objetivo = UUID(request.query_params.get("objetivo", ""))
+            inicio = date.fromisoformat(request.query_params.get("inicio", ""))
+            fim = date.fromisoformat(request.query_params.get("fim", ""))
+        except (ValueError, TypeError) as exc:
+            raise ValidationError(
+                {"detail": "Informe paciente, objetivo e datas válidas."}
+            ) from exc
+        if fim < inicio or (fim - inicio).days > 365:
+            raise ValidationError({"detail": "Informe um período de até 366 dias."})
+        if not ItemPlanoFono.objects.filter(
+            pk=objetivo,
+            plano__paciente_id=paciente,
+            plano__paciente__equipe__profissional=request.user,
+            plano__paciente__equipe__ativo=True,
+        ).exists():
+            raise Http404
+        sessoes = list(
+            self.get_queryset()
+            .filter(paciente_id=paciente, objetivo_id=objetivo, data__range=(inicio, fim))
+            .order_by("data", "criado_em", "id")[:1001]
+        )
+        if len(sessoes) > 1000:
+            raise ValidationError(
+                {"detail": "Mais de 1000 sessões no período; reduza o intervalo."}
+            )
+        por_data = {}
+        for sessao in sessoes:
+            chave = sessao.data.isoformat()
+            item = por_data.setdefault(
+                chave,
+                {
+                    "data": chave,
+                    "sessoes": 0,
+                    "total": 0,
+                    "independentes": 0,
+                    "erros": 0,
+                    "ajudas": 0,
+                },
+            )
+            tentativas = json.loads(sessao.tentativas_cifradas)
+            item["sessoes"] += 1
+            item["total"] += len(tentativas)
+            item["independentes"] += tentativas.count("I")
+            item["erros"] += tentativas.count("E")
+            item["ajudas"] += sum(codigo not in ("I", "E") for codigo in tentativas)
+        pontos = []
+        for item in por_data.values():
+            total = item["total"]
+            for campo in ("independentes", "erros", "ajudas"):
+                item[f"percentual_{campo}"] = round(item[campo] * 100 / total, 2) if total else None
+            pontos.append(item)
+        return Response(
+            {
+                "inicio": inicio.isoformat(),
+                "fim": fim.isoformat(),
+                "objetivo": str(objetivo),
+                "pontos": pontos,
+            }
         )
 
     def perform_create(self, serializer):
