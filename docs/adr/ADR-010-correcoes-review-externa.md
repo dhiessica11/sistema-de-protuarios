@@ -1,5 +1,7 @@
 # ADR-010 — Correcoes de codigo apos review externa (v0.2.2)
 
+> Nota atual: referências à obrigatoriedade gov.br abaixo são históricas; a decisão vigente é a [integração futura ICP-Brasil](../integracoes/assinatura-icp-brasil.md).
+
 **Data:** 2026-11-02
 **Status:** Aceita e VALIDADA executando pytest + ruff + makemigrations check
 

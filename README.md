@@ -4,7 +4,7 @@ Sistema de prontuário clínico infantil (fonoaudiologia + TO + psicologia).
 Compliance CFFa 777/2025 + LGPD. Single-tenant self-hosted.
 
 **Versão-base:** 0.2.4 (dependências e leitura de chaves corrigidas sobre os Lotes 1 + 2)
-**Status:** Em desenvolvimento, nunca rodou em produção. Sobre a v0.2.4: Registro, retificação e adendo em revisão; assinatura gov.br ainda pendente.
+**Status:** Em desenvolvimento, nunca rodou em produção. Sobre a v0.2.4: Registro, retificação e adendo em revisão; assinatura ICP-Brasil ainda não implementada.
 
 ## Pré-validação
 
@@ -159,7 +159,7 @@ Rebuild: `docker compose up --build --force-recreate web`.
 
 - [x] **Lote 1** — Infra Docker + Django base
 - [x] **Lote 2 (v0.2.2)** — Models core + cifra multi-chave + API v1 + 39 testes na entrega original
-- [ ] **Lote 3** — Registro clínico + autoria imutável + retificação + assinatura avançada (gov.br obrigatório)
+- [ ] **Lote 3** — Registro clínico + autoria imutável + retificação + assinatura qualificada ICP-Brasil (integração futura)
 - [ ] **Lote 4** — Agenda + faltas + feriados
 - [ ] **Lote 5** — Documentos + upload seguro + ClamAV
 - [ ] **Lote 6** — Portal responsável
@@ -181,7 +181,7 @@ Honestidade: a documentação do vault descreve controles planejados, muitos ain
 - Resposta a incidente (procedimento no cofre — não escrito ainda)
 - Portal do responsável (Lote 6)
 - ClamAV + pipeline seguro de upload (Lote 5)
-- Assinatura avançada CFFa (gov.br obrigatório — Lote 3)
+- Assinatura qualificada ICP-Brasil (integração futura — Lote 3)
 
 Estado atual de cada item: usar vocabulário objetivo —
 `identificado → decidido → modelado → implementado → testado → validado externamente → em produção`.
@@ -198,6 +198,6 @@ Permissões de escrita e limites da etapa atual:
 No vault Obsidian em `Memoria Claude/02-Pessoal/prontuario-espaco-desenvolver/`.
 
 Registro, retificação e adendo: [documentação](docs/seguranca/REGISTRO.md).
-Viabilidade da integração obrigatória: [assinatura gov.br](docs/integracoes/govbr-viabilidade.md).
+Decisão e requisitos para a futura [assinatura ICP-Brasil](docs/integracoes/assinatura-icp-brasil.md).
 
 Separação do perfil técnico: [TI e administração](docs/seguranca/PERFIL-TI.md).

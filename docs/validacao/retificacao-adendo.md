@@ -39,6 +39,6 @@ caracteres é validado na API porque o texto é cifrado. Roles restritas, MFA e 
 completa permanecem pendentes.
 
 Não há assinatura eletrônica implementada. As retificações e os adendos não são
-clinicamente finalizados por este código. A elegibilidade de acesso da clínica
-privada à API gov.br está pendente de confirmação, conforme pesquisa em
-`docs/integracoes/govbr-viabilidade.md`. Não utilizar dados reais nesta etapa.
+clinicamente finalizados por este código. A assinatura qualificada ICP-Brasil
+foi escolhida para integração futura, ainda não implementada; veja
+`docs/integracoes/assinatura-icp-brasil.md`. Não utilizar dados reais nesta etapa.

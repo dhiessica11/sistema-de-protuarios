@@ -1,8 +1,9 @@
 # Assinatura gov.br: viabilidade da integração
 
-Pesquisa inicial: 2026-11-03. Estado: **elegibilidade da clínica privada não
-confirmada**. A decisão de exigir gov.br no v0 permanece; este documento registra
-um risco de acesso técnico, sem substituí-la por outro fornecedor.
+Pesquisa histórica: 2026-11-03. A obrigatoriedade de integração gov.br foi
+substituída pela decisão de adotar assinatura qualificada ICP-Brasil; veja
+[decisão atual](assinatura-icp-brasil.md). Este documento preserva a pesquisa
+anterior. A elegibilidade da clínica privada não foi confirmada.
 
 A responsável informou que a clínica ainda não possui acesso aprovado ao ambiente
 de homologação. Não há credenciais configuradas no ambiente desta tarefa.
@@ -22,7 +23,7 @@ descreve credenciais previamente autorizadas, OAuth, consentimento do signatári
 assinatura de hash e obtenção de certificado. Login gov.br, por si só, não é
 assinatura. Uma simulação, TOTP ou booleano local não constituem evidência válida.
 
-## Próximas verificações
+## Verificações históricas (não são pré-requisitos da decisão atual)
 
 1. Confirmar junto ao canal oficial a elegibilidade e o caminho de integração para
    clínica privada, inclusive eventual uso por intermediário autorizado. Não há

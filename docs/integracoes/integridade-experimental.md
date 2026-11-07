@@ -19,5 +19,5 @@ por ID, sem comprovar o conteúdo da cadeia anterior. Esses pontos devem ser res
 antes de qualquer assinatura. Uma impressão digital não comprova que o profissional
 viu ou aprovou o conteúdo, nem valida certificado, identidade ou integridade no tempo.
 
-A elegibilidade da clínica privada e as credenciais do provedor continuam pendentes:
-veja `govbr-viabilidade.md`. Não usar a função como evidência ou com dados reais.
+A seleção do mecanismo e a integração ICP-Brasil continuam pendentes:
+veja `assinatura-icp-brasil.md`. Não usar a função como evidência ou com dados reais.

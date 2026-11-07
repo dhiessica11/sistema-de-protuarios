@@ -39,8 +39,8 @@ A API calcula `estado_assinatura: sem_assinatura` para todos os registros, inclu
 resumos compartilhados. O campo não é evidência nem implementação de assinatura.
 Não existe assinatura eletrônica
 implementada nem evidência de assinatura: os novos registros não devem ser tratados
-como retificações clínicas finalizadas. A viabilidade de integração gov.br para
-clínica privada está em `docs/integracoes/govbr-viabilidade.md`.
+como retificações clínicas finalizadas. A decisão e os requisitos da futura
+assinatura estão em `docs/integracoes/assinatura-icp-brasil.md`.
 
 A proteção do PostgreSQL não impede TRUNCATE nem um owner/superuser de desabilitar
 triggers. A role de aplicação deve ter privilégios limitados. SQLite não implementa

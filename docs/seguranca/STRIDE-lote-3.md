@@ -1,5 +1,9 @@
 # Modelo de ameaças STRIDE — preparação do Lote 3
 
+**Decisão atualizada:** a integração gov.br deixou de ser obrigatória; a assinatura
+qualificada ICP-Brasil foi escolhida para integração futura. A análise da arquitetura
+definitiva e dos riscos específicos do mecanismo escolhido permanece pendente.
+
 **Atualização posterior:** TI deixou de ser admin na API; a gestão de usuários no
 Django Admin exige papel administrativo. Acesso direto a infraestrutura e modo
 emergencial auditado continuam pendentes; TH04 não está totalmente encerrada.
@@ -25,13 +29,13 @@ parecer jurídico, pentest nem declaração de conformidade.
 
 Sistema single-tenant para prontuário infantil, atualmente sem dados reais e sem
 produção. Abrange autenticação, autorização da API, dados cifrados, PostgreSQL,
-fila Redis/Celery e os futuros Registro, retificação, adendo e assinatura gov.br.
+fila Redis/Celery e Registro, retificação, adendo e futura assinatura ICP-Brasil.
 Portal, uploads, teleatendimento e auditoria completa permanecem nos lotes previstos;
 suas interfaces futuras são consideradas apenas onde afetam o Lote 3.
 
 Preservam-se as decisões: login por username, autoria indelegável, retificação
 como novo registro da mesma categoria, adendo distinto de retificação, resumo
-compartilhado e detalhes privados por categoria. Gov.br é obrigatório no v0.
+compartilhado e detalhes privados por categoria. A assinatura ICP-Brasil é planejada.
 TOTP autentica; não substitui assinatura eletrônica avançada ou qualificada.
 
 A análise distingue código observado, falha reproduzida e controle proposto.
@@ -66,7 +70,7 @@ flowchart LR
   R --> W[Celery]
   K --> W
   W --> P
-  A -.->|F5 protocolo oficial futuro| G[Serviço gov.br de assinatura]
+  A -.->|F5 protocolo oficial futuro| G[Mecanismo futuro de assinatura ICP-Brasil]
   G -.->|Retorno validado no servidor| A
   P -.->|F6 backup cifrado futuro| B[Storage nacional]
   A -.->|F7 eventos futuros| L[Auditoria e destino independente]
@@ -114,7 +118,7 @@ I = divulgação; D = indisponibilidade; E = elevação de privilégio.
 1. **Integridade histórica:** autor e categoria no momento da autoria não podem
    depender de alteração posterior no cadastro do profissional. Usar evidência ou
    snapshot histórico imutável e definir a política antes das migrations de Registro.
-2. **Assinatura:** autenticação gov.br e assinatura gov.br são fluxos distintos.
+2. **Assinatura:** autenticação no sistema e assinatura ICP-Brasil são fluxos distintos.
    O desenho precisa confirmar produto, acesso, protocolo e verificabilidade com
    a documentação oficial vigente. Não inventar endpoint, certificado ou evidência,
    nem apresentar um adaptador simulado como integração concluída.
@@ -139,7 +143,7 @@ I = divulgação; D = indisponibilidade; E = elevação de privilégio.
 | Autorização antes de Registro | Matriz de campos e categoria aplicada; acesso ao destino e ações revisados | Matriz cadastral implementada/testada; texto clínico por categoria depende de Registro, conforme PERMISSOES-CADASTRAIS.md |
 | Desenho de Registro | Invariantes de autoria, conteúdo selado, retificação/adendo e categoria histórica definidos | Requisitos acima documentados; implementação pendente |
 | Evidência PG | Testes de concorrência/SQL sob role runtime, incluindo tentativas de alteração direta | Pendente |
-| Integração gov.br | Acesso técnico obtido, fluxo real e validação de evidência testados | Dependência externa pendente; não bloqueia o desenho local |
+| Integração ICP-Brasil | Mecanismo escolhido, fluxo real e validação de evidência testados | Pendente; não bloqueia o desenho local |
 | Entrada de dados reais | MFA, isolamento de privilégios, logs, restauração, cerimônia e requisitos jurídicos/operacionais cumpridos | Pendente; fora da aprovação deste documento |
 
 Não há autorização para dados reais por este relatório. MFA, TI/break-glass e
@@ -154,7 +158,7 @@ Os demais riscos não foram aceitos como resolvidos pelo simples registro no bac
   nenhum dado real foi consultado ou alterado. Regressão em
   `backend/apps/clinica/tests/test_responsavel_vinculo.py`.
 - Atualizar este modelo quando mudarem papéis, exposição de rede, categorias,
-  formato assinado, integração gov.br, portal ou filas. A cada alteração, vincular
+  formato assinado, mecanismo de assinatura, portal ou filas. A cada alteração, vincular
   ameaça, controle e teste em PR; revisão técnica pela responsável pelo projeto.
 - Matriz jurídica CFP/COFFITO e adequação dos artefatos de assinatura continuam
   dependentes de validação especializada; este documento não as substitui.

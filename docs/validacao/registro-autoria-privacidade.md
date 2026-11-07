@@ -1,5 +1,7 @@
 # Validação de Registro: autoria e privacidade
 
+> Nota atual: referências à obrigatoriedade gov.br abaixo são históricas; a decisão vigente é a [integração futura ICP-Brasil](../integracoes/assinatura-icp-brasil.md).
+
 **Atualização posterior:** a migration `0005` também passou a rejeitar UPDATE e
 DELETE do conteúdo no PostgreSQL. A observação contrária abaixo descreve a revisão
 anterior; consulte `retificacao-adendo.md` para o estado e os limites atuais.
