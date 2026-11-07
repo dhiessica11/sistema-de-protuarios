@@ -57,6 +57,12 @@ avaliação disponível por protocolo, enquanto a aba Dificuldades PEI indica s�
 da avaliação inicial. Essas diferenças precisam ser escolhidas explicitamente na
 interface e preservadas como contexto no resultado.
 
+No Checklist Motor-Oral, as marcações abrangem postura, controle mandibular,
+labiofacial e lingual, com observações e campos livres. As fórmulas consolidam
+alvos da avaliação mais recente; não é seguro supor que toda opção marcada seja
+uma dificuldade. A fonoaudióloga deve validar o significado de cada item e a
+correspondência com uma proposta antes da implementação das regras automáticas.
+
 ## Requisitos de segurança e implantação
 
 - Acesso exclusivo a fonoaudiólogas vinculadas ao paciente, com as mesmas regras de
