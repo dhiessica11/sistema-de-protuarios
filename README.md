@@ -71,6 +71,9 @@ de desenvolvimento e não autoriza o uso com dados reais. Na rede local de teste
 use o endereço do servidor na porta 8000; não exponha o servidor de desenvolvimento
 à internet.
 
+A atualização automática **de desenvolvimento** no mini servidor está descrita em
+[deploy-automatico-dev.md](docs/deploy-automatico-dev.md).
+
 ## Rodar os testes
 
 ```bash

@@ -1,0 +1,7 @@
+[Unit]
+Description=Atualiza o prontuário de desenvolvimento após CI aprovado
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/projetos/sistema-de-protuarios
+ExecStart=/usr/bin/python3 %h/projetos/sistema-de-protuarios/scripts/deploy_dev.py

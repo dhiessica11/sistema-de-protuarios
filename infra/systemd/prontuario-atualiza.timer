@@ -1,0 +1,10 @@
+[Unit]
+Description=Verifica atualizações do prontuário de desenvolvimento
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Unit=prontuario-atualiza.service
+
+[Install]
+WantedBy=timers.target
