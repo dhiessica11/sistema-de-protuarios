@@ -76,9 +76,12 @@ interface e preservadas como contexto no resultado.
 
 ## Critérios do primeiro incremento
 
-O primeiro protocolo será escolhido com a clínica. Entregar seu fluxo completo com
+Começar pelo Checklist Motor-Oral como hipótese de primeiro protocolo, sujeita à
+prioridade da clínica e à validação dos critérios. Entregar seu fluxo completo com
 avaliação e reavaliação, dificuldade e proposta pendente, revisão pela fonoaudióloga,
 histórico e testes de privacidade. Validar o comportamento com o exemplo fictício e
-casos adicionais, antes de ampliar para outros protocolos. Definir separadamente se
-fonIA é apenas referência ou se há integração autorizada e documentada; nenhum dado
-será enviado ao serviço por esta proposta.
+casos adicionais, antes de ampliar para outros protocolos.
+
+A responsável esclareceu que o fonIA é referência de funcionalidades a construir
+no próprio sistema, não uma conexão à conta ou ao serviço. Não se pressupõe
+compatibilidade ou integração com o fonIA e nenhum dado será enviado a ele.
