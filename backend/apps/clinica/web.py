@@ -8,6 +8,8 @@ from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
+from .permissions import admin_clinico_teste
+
 
 def habilitada():
     if not getattr(settings, "WEB_CONSULTA_HABILITADA", False):
@@ -40,5 +42,9 @@ def inicio(request):
     return render(
         request,
         "clinica/inicio.html",
-        {"clinico": request.user.eh_profissional_clinico, "fono": request.user.tipo == "fono"},
+        {
+            "clinico": request.user.eh_profissional_clinico or admin_clinico_teste(request.user),
+            "fono": request.user.tipo == "fono" or admin_clinico_teste(request.user),
+            "admin_teste": admin_clinico_teste(request.user),
+        },
     )

@@ -60,17 +60,19 @@ Abrir no navegador:
 - `http://localhost:8000/api/v1/` — API browsable
 
 A interface web inicial usa a conta existente e apresenta pacientes conforme o perfil;
-profissionais podem consultar os registros acessíveis pela API. A administração não
-vê texto clínico, e TI não acessa essa tela. Profissionais de fono vinculados podem
-criar avaliações de teste, registrar dificuldades e revisar as propostas geradas.
+profissionais podem consultar os registros acessíveis pela API. Na configuração de
+desenvolvimento com dados fictícios, a conta admin também pode visualizar os dados
+clínicos, criar e corrigir avaliações, planos e sessões como autora administrativa.
+TI continua sem acesso clínico. Profissionais de fono vinculados podem criar
+avaliações de teste, registrar dificuldades e revisar as propostas geradas.
 Reavaliações são vinculadas a uma avaliação anterior do mesmo protocolo. A área de
 planejamento permite salvar planos de teste com metas para objetivos aprovados.
 Sessões de teste permitem registrar tentativas e visualizar seus percentuais; a
 evolução por objetivo apresenta resultados diários em períodos de até 366 dias. A
-interface ainda não possui cadastro de pacientes, criação de registros clínicos ou assinatura. Ela só está habilitada nas configurações
-de desenvolvimento e não autoriza o uso com dados reais. Na rede local de testes,
-use o endereço do servidor na porta 8000; não exponha o servidor de desenvolvimento
-à internet.
+interface ainda não possui cadastro de pacientes, criação de registros clínicos ou
+assinatura. Ela só está habilitada nas configurações de desenvolvimento e não autoriza
+o uso com dados reais. Na rede local de testes, use o endereço do servidor na porta
+8000; não exponha o servidor de desenvolvimento à internet.
 
 A atualização automática **de desenvolvimento** no mini servidor está descrita em
 [deploy-automatico-dev.md](docs/deploy-automatico-dev.md).

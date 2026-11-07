@@ -17,6 +17,7 @@ from .models import (
     Responsavel,
     Usuario,
 )
+from .permissions import admin_clinico_teste
 
 
 class UsuarioSerializer(serializers.ModelSerializer):
@@ -169,6 +170,13 @@ class PacienteSerializer(CadastroProtegidoSerializer):
             "nome_apresentacao",
         )
 
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get("request")
+        if request and admin_clinico_teste(request.user):
+            fields["cpf"].write_only = False
+        return fields
+
     def get_nome_apresentacao(self, obj):
         return obj.nome_social or obj.nome_civil
 
@@ -227,6 +235,14 @@ class ResponsavelSerializer(CadastroProtegidoSerializer):
             "justificativa_alteracao",
         )
         read_only_fields = ("id", "criado_em")
+
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get("request")
+        if request and admin_clinico_teste(request.user):
+            fields["cpf"].write_only = False
+            fields["nome"].write_only = False
+        return fields
 
     def validate_cpf(self, value):
         validar_cpf(value)

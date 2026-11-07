@@ -11,7 +11,10 @@ Regras:
 - Consentimento imutavel apos criacao (so GET/POST)
 """
 
+from uuid import UUID
+
 from rest_framework import viewsets
+from rest_framework.exceptions import ValidationError
 
 from .models import (
     Clinica,
@@ -101,13 +104,22 @@ class ResponsavelViewSet(viewsets.ModelViewSet):
         if not user.is_authenticated:
             return Responsavel.objects.none()
         if user.eh_admin:
-            return Responsavel.objects.all()
-        if user.eh_profissional_clinico:
-            return Responsavel.objects.filter(
+            responsaveis = Responsavel.objects.all()
+        elif user.eh_profissional_clinico:
+            responsaveis = Responsavel.objects.filter(
                 paciente__equipe__profissional=user,
                 paciente__equipe__ativo=True,
             ).distinct()
-        return Responsavel.objects.none()
+        else:
+            return Responsavel.objects.none()
+        paciente = self.request.query_params.get("paciente")
+        if paciente is not None:
+            try:
+                paciente = UUID(paciente)
+            except (ValueError, TypeError, AttributeError) as exc:
+                raise ValidationError({"paciente": "Identificador inválido."}) from exc
+            responsaveis = responsaveis.filter(paciente_id=paciente)
+        return responsaveis.order_by("id")
 
     def perform_create(self, serializer):
         serializer.save(criado_por=self.request.user)

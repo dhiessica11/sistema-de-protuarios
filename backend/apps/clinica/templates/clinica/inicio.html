@@ -1,13 +1,14 @@
 {% extends 'clinica/base.html' %}{% load static %}{% block conteudo %}
 <div class="cabecalho"><div><span class="rotulo">ÁREA DE TRABALHO · TESTES</span><h1>Olá, {{ user.first_name|default:user.username }}</h1><p>Consulte os pacientes disponíveis para seu perfil.</p></div><span class="perfil">{{ user.get_tipo_display }}</span></div>
-<div class="aviso">Ambiente de desenvolvimento: utilize apenas dados fictícios. Os registros estão sem assinatura.</div>
+<div class="aviso">Ambiente de desenvolvimento: utilize apenas dados fictícios. Os registros estão sem assinatura.{% if admin_teste %} A conta administrativa pode operar dados fictícios e suas ações ficam identificadas como administrativas.{% endif %}</div>
 <div class="grade"><section class="painel"><div class="titulo"><div><span class="rotulo">ACOMPANHAMENTO</span><h2>Pacientes</h2></div></div><p class="ajuda">Selecione um paciente para consultar os registros.</p><div id="pacientes" aria-live="polite">Carregando pacientes…</div><nav class="paginacao" id="paginas" aria-label="Paginação de pacientes"></nav></section>
 <section class="painel"><span class="rotulo">PRONTUÁRIO</span><h2 id="nome-paciente">Selecione um paciente</h2><div id="registros" aria-live="polite"><p class="ajuda">Os registros disponíveis aparecerão aqui.</p></div><nav class="paginacao" id="paginas-registros" aria-label="Paginação de registros"></nav></section></div>
+{% if admin_teste %}<section id="cadastro-admin" class="painel avaliacao" hidden><span class="rotulo">CADASTRO · DADOS FICTÍCIOS</span><h2>Dados do paciente e responsáveis</h2><div id="dados-cadastrais" aria-live="polite"></div><h3>Responsáveis</h3><div id="responsaveis-admin" aria-live="polite"></div><nav id="paginas-responsaveis" class="paginacao" aria-label="Paginação de responsáveis"></nav></section>{% endif %}
 {% if fono %}
 <section id="avaliacoes-fono" class="painel avaliacao" hidden>
 <span class="rotulo">FONOAUDIOLOGIA · TESTES</span><h2>Avaliações e objetivos</h2>
 <p class="ajuda">Registre dificuldades fictícias. Cada uma gera um rascunho para revisão; não há cálculo de protocolo.</p>
-<form id="form-avaliacao">{% csrf_token %}
+<form id="form-avaliacao">{% csrf_token %}<input type="hidden" id="corrige-avaliacao"><p id="edicao-avaliacao" class="ajuda"></p><button id="cancelar-avaliacao" class="secundario" type="button" hidden>Cancelar correção</button>
 <label for="protocolo">Protocolo ou tipo de avaliação</label><input id="protocolo" maxlength="200" required placeholder="Ex.: Checklist Motor-Oral">
 <label for="data-avaliacao">Data da avaliação</label><input id="data-avaliacao" type="date" required>
 <label for="origem-avaliacao">Avaliação anterior (para reavaliação)</label><select id="origem-avaliacao"><option value="">Avaliação inicial</option></select>
@@ -18,7 +19,7 @@
 </section>
 <section id="planos-fono" class="painel avaliacao" hidden>
 <span class="rotulo">PLANEJAMENTO · TESTES</span><h2>Plano terapêutico</h2><p class="ajuda">Selecione objetivos aprovados na página atual de avaliações e descreva uma meta para cada um. Uma versão salva não altera os planos anteriores.</p>
-<form id="form-plano">{% csrf_token %}<label for="inicio-plano">Início</label><input id="inicio-plano" type="date" required><label for="fim-plano">Fim</label><input id="fim-plano" type="date" required>
+<form id="form-plano">{% csrf_token %}<input type="hidden" id="corrige-plano"><p id="edicao-plano" class="ajuda"></p><button id="cancelar-plano" class="secundario" type="button" hidden>Cancelar correção</button><label for="inicio-plano">Início</label><input id="inicio-plano" type="date" required><label for="fim-plano">Fim</label><input id="fim-plano" type="date" required>
 <fieldset><legend>Objetivos aprovados</legend><div id="objetivos-plano">Selecione um paciente.</div></fieldset>
 <label for="recursos-plano">Recursos</label><textarea id="recursos-plano" maxlength="5000"></textarea>
 <label for="orientacoes-plano">Orientações</label><textarea id="orientacoes-plano" maxlength="5000"></textarea>
@@ -27,7 +28,7 @@
 <section id="sessoes-fono" class="painel avaliacao" hidden>
 <span class="rotulo">ATENDIMENTO · TESTES</span><h2>Sessões e tentativas</h2>
 <p class="ajuda">Registre somente oportunidades observadas. Sem tentativas, os percentuais ficam sem dados.</p>
-<form id="form-sessao">{% csrf_token %}<label for="data-sessao">Data da sessão</label><input id="data-sessao" type="date" required>
+<form id="form-sessao">{% csrf_token %}<input type="hidden" id="corrige-sessao"><p id="edicao-sessao" class="ajuda"></p><button id="cancelar-sessao" class="secundario" type="button" hidden>Cancelar correção</button><label for="data-sessao">Data da sessão</label><input id="data-sessao" type="date" required>
 <label for="atividade-sessao">Atividade</label><input id="atividade-sessao" maxlength="1000" required>
 <label for="objetivo-sessao">Objetivo do plano (opcional)</label><select id="objetivo-sessao"><option value="">Sem objetivo vinculado</option></select>
 <fieldset><legend>Tentativas</legend><div id="tentativas-sessao"></div><button id="adicionar-tentativa" class="secundario" type="button">Adicionar tentativa</button></fieldset>
@@ -43,5 +44,5 @@
 <button class="principal" type="submit">Ver evolução</button></form>
 <div id="resultado-evolucao" aria-live="polite"><p class="ajuda">Selecione um paciente e um objetivo.</p></div>
 </section>{% endif %}
-<div id="config-web" data-clinico="{% if clinico %}true{% else %}false{% endif %}" data-fono="{% if fono %}true{% else %}false{% endif %}"></div><script src="{% static 'clinica/web.js' %}" defer></script>
+<div id="config-web" data-clinico="{% if clinico %}true{% else %}false{% endif %}" data-fono="{% if fono %}true{% else %}false{% endif %}" data-admin-teste="{% if admin_teste %}true{% else %}false{% endif %}"></div><script src="{% static 'clinica/web.js' %}" defer></script>
 {% endblock %}

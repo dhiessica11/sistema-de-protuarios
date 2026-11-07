@@ -535,6 +535,9 @@ class AvaliacaoFono(UUIDModel):
     paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, related_name="avaliacoes_fono")
     autor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="avaliacoes_fono")
     origem = models.ForeignKey("self", on_delete=models.PROTECT, null=True, blank=True)
+    corrige = models.OneToOneField(
+        "self", on_delete=models.PROTECT, null=True, blank=True, related_name="correcao"
+    )
     data = models.DateField()
     protocolo = EncryptedTextField(key="A")
     observacoes = EncryptedTextField(key="A", blank=True)
@@ -573,6 +576,9 @@ class PlanoFono(UUIDModel):
 
     paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, related_name="planos_fono")
     autor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="planos_fono")
+    corrige = models.OneToOneField(
+        "self", on_delete=models.PROTECT, null=True, blank=True, related_name="correcao"
+    )
     inicio = models.DateField()
     fim = models.DateField()
     recursos = EncryptedTextField(key="A", blank=True)
@@ -607,6 +613,9 @@ class SessaoFono(UUIDModel):
     autor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="sessoes_fono")
     objetivo = models.ForeignKey(
         ItemPlanoFono, on_delete=models.PROTECT, null=True, blank=True, related_name="sessoes"
+    )
+    corrige = models.OneToOneField(
+        "self", on_delete=models.PROTECT, null=True, blank=True, related_name="correcao"
     )
     data = models.DateField()
     atividade = EncryptedTextField(key="A")

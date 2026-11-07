@@ -10,13 +10,17 @@ from rest_framework import serializers, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import BasePermission
 
+from .correcao_teste import bloquear_e_validar_correcao, validar_paciente_correcao
 from .models import AvaliacaoFono, DificuldadeFono, Paciente, RevisaoObjetivoFono, TipoUsuario
+from .permissions import admin_clinico_teste
 
 
 class FonoEmTeste(BasePermission):
     def has_permission(self, request, view):
         if not getattr(settings, "WEB_CONSULTA_HABILITADA", False):
             raise Http404
+        if admin_clinico_teste(request.user):
+            return True
         return (
             request.user.is_authenticated
             and request.user.is_active
@@ -50,6 +54,10 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
     origem = serializers.PrimaryKeyRelatedField(
         queryset=AvaliacaoFono.objects.none(), allow_null=True, required=False
     )
+    corrige = serializers.PrimaryKeyRelatedField(
+        queryset=AvaliacaoFono.objects.none(), allow_null=True, required=False
+    )
+    corrigida = serializers.SerializerMethodField()
     dificuldades = DificuldadeSerializer(many=True, read_only=True)
     dificuldades_informadas = serializers.ListField(
         child=serializers.CharField(max_length=500, allow_blank=False),
@@ -67,6 +75,8 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
             "paciente",
             "autor",
             "origem",
+            "corrige",
+            "corrigida",
             "data",
             "protocolo",
             "observacoes",
@@ -76,21 +86,31 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("id", "autor", "criado_em")
 
+    def get_corrigida(self, obj):
+        return AvaliacaoFono.objects.filter(corrige_id=obj.pk).exists()
+
     def get_fields(self):
         fields = super().get_fields()
         user = self.context["request"].user
+        if admin_clinico_teste(user):
+            fields["paciente"].queryset = Paciente.objects.all()
+            fields["origem"].queryset = AvaliacaoFono.objects.all()
+            fields["corrige"].queryset = AvaliacaoFono.objects.all()
+            return fields
         fields["paciente"].queryset = Paciente.objects.filter(
             equipe__profissional=user, equipe__ativo=True
         ).distinct()
         fields["origem"].queryset = AvaliacaoFono.objects.filter(
             paciente__equipe__profissional=user, paciente__equipe__ativo=True
         ).distinct()
+        fields["corrige"].queryset = fields["origem"].queryset
         return fields
 
     def to_internal_value(self, data):
         permitidos = {
             "paciente",
             "origem",
+            "corrige",
             "data",
             "protocolo",
             "observacoes",
@@ -110,11 +130,12 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 {"protocolo": "A reavaliação deve usar o mesmo protocolo da origem."}
             )
-        return attrs
+        return validar_paciente_correcao(attrs)
 
     @transaction.atomic
     def create(self, validated_data):
         dificuldades = validated_data.pop("dificuldades_informadas")
+        bloquear_e_validar_correcao(AvaliacaoFono, validated_data.get("corrige"))
         avaliacao = AvaliacaoFono.objects.create(**validated_data)
         for texto in dificuldades:
             DificuldadeFono.objects.create(
@@ -130,11 +151,13 @@ class AvaliacaoViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "head", "options"]
 
     def get_queryset(self):
-        return (
-            AvaliacaoFono.objects.filter(
+        avaliacoes = AvaliacaoFono.objects.all()
+        if not admin_clinico_teste(self.request.user):
+            avaliacoes = avaliacoes.filter(
                 paciente__equipe__profissional=self.request.user, paciente__equipe__ativo=True
             )
-            .prefetch_related(
+        return (
+            avaliacoes.prefetch_related(
                 Prefetch(
                     "dificuldades",
                     queryset=DificuldadeFono.objects.order_by("criado_em", "id").prefetch_related(
@@ -183,12 +206,17 @@ class RevisaoViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_create(self, serializer):
-        dificuldade = DificuldadeFono.objects.filter(
-            pk=self.kwargs["dificuldade_pk"],
-            avaliacao__paciente__equipe__profissional=self.request.user,
-            avaliacao__paciente__equipe__ativo=True,
-        ).first()
+        dificuldades = DificuldadeFono.objects.filter(pk=self.kwargs["dificuldade_pk"])
+        if not admin_clinico_teste(self.request.user):
+            dificuldades = dificuldades.filter(
+                avaliacao__paciente__equipe__profissional=self.request.user,
+                avaliacao__paciente__equipe__ativo=True,
+            )
+        dificuldade = dificuldades.first()
         if dificuldade is None:
             raise Http404
+        AvaliacaoFono.objects.select_for_update().get(pk=dificuldade.avaliacao_id)
         dificuldade = DificuldadeFono.objects.select_for_update().get(pk=dificuldade.pk)
+        if AvaliacaoFono.objects.filter(corrige_id=dificuldade.avaliacao_id).exists():
+            raise ValidationError({"detail": "Avaliação corrigida; revise a versão mais recente."})
         serializer.save(autor=self.request.user, dificuldade=dificuldade)

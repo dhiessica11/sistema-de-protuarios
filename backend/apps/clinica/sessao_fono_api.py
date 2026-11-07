@@ -4,6 +4,7 @@ import json
 from datetime import date
 from uuid import UUID
 
+from django.db import transaction
 from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -13,7 +14,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from .avaliacao_fono_api import FonoEmTeste
+from .correcao_teste import bloquear_e_validar_correcao, validar_paciente_correcao
 from .models import ItemPlanoFono, Paciente, SessaoFono
+from .permissions import admin_clinico_teste
 
 
 class SessaoSerializer(serializers.ModelSerializer):
@@ -21,6 +24,10 @@ class SessaoSerializer(serializers.ModelSerializer):
     objetivo = serializers.PrimaryKeyRelatedField(
         queryset=ItemPlanoFono.objects.none(), required=False, allow_null=True
     )
+    corrige = serializers.PrimaryKeyRelatedField(
+        queryset=SessaoFono.objects.none(), allow_null=True, required=False
+    )
+    corrigida = serializers.SerializerMethodField()
     atividade = serializers.CharField(max_length=1000, allow_blank=False)
     observacoes = serializers.CharField(max_length=5000, required=False, allow_blank=True)
     tentativas = serializers.ListField(
@@ -43,6 +50,8 @@ class SessaoSerializer(serializers.ModelSerializer):
             "autor",
             "objetivo",
             "objetivo_texto",
+            "corrige",
+            "corrigida",
             "data",
             "atividade",
             "observacoes",
@@ -53,19 +62,38 @@ class SessaoSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("id", "autor", "criado_em")
 
+    def get_corrigida(self, obj):
+        return SessaoFono.objects.filter(corrige_id=obj.pk).exists()
+
     def get_fields(self):
         fields = super().get_fields()
         user = self.context["request"].user
+        if admin_clinico_teste(user):
+            fields["paciente"].queryset = Paciente.objects.all()
+            fields["objetivo"].queryset = ItemPlanoFono.objects.all()
+            fields["corrige"].queryset = SessaoFono.objects.all()
+            return fields
         fields["paciente"].queryset = Paciente.objects.filter(
             equipe__profissional=user, equipe__ativo=True
         ).distinct()
         fields["objetivo"].queryset = ItemPlanoFono.objects.filter(
             plano__paciente__equipe__profissional=user, plano__paciente__equipe__ativo=True
         ).distinct()
+        fields["corrige"].queryset = SessaoFono.objects.filter(
+            paciente__equipe__profissional=user, paciente__equipe__ativo=True
+        ).distinct()
         return fields
 
     def to_internal_value(self, data):
-        allowed = {"paciente", "objetivo", "data", "atividade", "observacoes", "tentativas"}
+        allowed = {
+            "paciente",
+            "objetivo",
+            "corrige",
+            "data",
+            "atividade",
+            "observacoes",
+            "tentativas",
+        }
         if hasattr(data, "keys") and set(data) - allowed:
             raise ValidationError({"detail": "Foram informados campos não permitidos."})
         return super().to_internal_value(data)
@@ -74,9 +102,11 @@ class SessaoSerializer(serializers.ModelSerializer):
         objetivo = attrs.get("objetivo")
         if objetivo and objetivo.plano.paciente_id != attrs["paciente"].id:
             raise ValidationError({"objetivo": "O objetivo deve pertencer ao mesmo paciente."})
-        return attrs
+        return validar_paciente_correcao(attrs)
 
+    @transaction.atomic
     def create(self, validated_data):
+        bloquear_e_validar_correcao(SessaoFono, validated_data.get("corrige"))
         tentativas = validated_data.pop("tentativas")
         validated_data["tentativas_cifradas"] = json.dumps(
             tentativas, ensure_ascii=True, separators=(",", ":")
@@ -111,11 +141,13 @@ class SessaoViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "head", "options"]
 
     def get_queryset(self):
-        return (
-            SessaoFono.objects.filter(
+        sessoes = SessaoFono.objects.all()
+        if not admin_clinico_teste(self.request.user):
+            sessoes = sessoes.filter(
                 paciente__equipe__profissional=self.request.user, paciente__equipe__ativo=True
             )
-            .select_related("objetivo__revisao")
+        return (
+            sessoes.select_related("objetivo__revisao")
             .order_by("-data", "-criado_em", "id")
             .distinct()
         )
@@ -148,16 +180,22 @@ class SessaoViewSet(viewsets.ModelViewSet):
             ) from exc
         if fim < inicio or (fim - inicio).days > 365:
             raise ValidationError({"detail": "Informe um período de até 366 dias."})
-        if not ItemPlanoFono.objects.filter(
-            pk=objetivo,
-            plano__paciente_id=paciente,
-            plano__paciente__equipe__profissional=request.user,
-            plano__paciente__equipe__ativo=True,
-        ).exists():
+        itens = ItemPlanoFono.objects.filter(pk=objetivo, plano__paciente_id=paciente)
+        if not admin_clinico_teste(request.user):
+            itens = itens.filter(
+                plano__paciente__equipe__profissional=request.user,
+                plano__paciente__equipe__ativo=True,
+            )
+        if not itens.exists():
             raise Http404
         sessoes = list(
             self.get_queryset()
-            .filter(paciente_id=paciente, objetivo_id=objetivo, data__range=(inicio, fim))
+            .filter(
+                paciente_id=paciente,
+                objetivo_id=objetivo,
+                data__range=(inicio, fim),
+                correcao__isnull=True,
+            )
             .order_by("data", "criado_em", "id")[:1001]
         )
         if len(sessoes) > 1000:

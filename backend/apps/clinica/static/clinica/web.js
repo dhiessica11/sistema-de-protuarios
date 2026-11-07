@@ -7,6 +7,9 @@
   const clinico = document.querySelector('#config-web').dataset.clinico === 'true';
   const fono = document.querySelector('#config-web').dataset.fono === 'true';
   const areaAvaliacao = document.querySelector('#avaliacoes-fono');
+  const adminTeste = document.querySelector('#config-web').dataset.adminTeste === 'true';
+  let consultaCadastro = 0;
+  let consultaResponsaveis = 0;
   let consultaAvaliacao = 0;
   let consultaPlano = 0;
   let consultaSessao = 0;
@@ -55,7 +58,9 @@
   }
   function selecionar(paciente) {
     selecionado = paciente;
+    if (fono) for (const tipo of ['avaliacao', 'plano', 'sessao']) { document.querySelector(`#edicao-${tipo}`).textContent = ''; document.querySelector(`#cancelar-${tipo}`).hidden = true; }
     nomePaciente.textContent = paciente.nome_apresentacao;
+    if (adminTeste) { document.querySelector('#cadastro-admin').hidden = false; carregarCadastro(); carregarResponsaveis(); }
     paginasRegistros.replaceChildren();
     if (!clinico) {
       registros.textContent = 'O perfil administrativo não acessa registros clínicos nesta área.';
@@ -77,13 +82,49 @@
         const cartao = elemento('article', '', 'registro');
         const data = new Date(registro.criado_em).toLocaleString('pt-BR');
         cartao.append(elemento('div', `${registro.tipo} · ${registro.categoria} · ${data}`, 'meta'));
+        if (adminTeste) cartao.append(elemento('p', `Autoria: ${registro.autor}`, 'meta'));
         cartao.append(elemento('p', registro.resumo || 'Sem resumo.'));
         if (registro.detalhe) cartao.append(elemento('p', registro.detalhe, 'detalhe'));
+        if (adminTeste && registro.origem) cartao.append(elemento('p', `Registro de origem: ${registro.origem}`, 'meta'));
+        if (adminTeste && registro.justificativa) cartao.append(elemento('p', `Justificativa: ${registro.justificativa}`));
+        if (adminTeste && registro.contato_validacao) cartao.append(elemento('p', `Contato de validação: ${registro.contato_validacao}`));
         cartao.append(elemento('span', 'Sem assinatura', 'assinatura'));
         registros.append(cartao);
       }
       paginar(paginasRegistros, dados, carregarRegistros);
     } catch (erro) { if (atual === requisicao) { registros.textContent = erro.message; paginasRegistros.replaceChildren(); } }
+  }
+  async function carregarCadastro() {
+    const atual = ++consultaCadastro;
+    const area = document.querySelector('#dados-cadastrais');
+    area.textContent = 'Carregando cadastro…';
+    try {
+      const dados = await obter(`/api/v1/pacientes/${encodeURIComponent(selecionado.id)}/`);
+      if (atual !== consultaCadastro) return;
+      area.replaceChildren();
+      const campos = [['Nome civil', 'nome_civil'], ['Nome social', 'nome_social'], ['CPF', 'cpf'], ['Nascimento', 'data_nascimento'], ['Sexo', 'sexo'], ['Nacionalidade', 'nacionalidade'], ['Naturalidade', 'naturalidade'], ['Endereço', 'endereco_cifrado'], ['Telefone', 'telefone_cifrado'], ['Status', 'status'], ['Encerramento', 'data_encerramento']];
+      for (const [rotulo, chave] of campos) if (dados[chave]) area.append(elemento('p', `${rotulo}: ${dados[chave]}`));
+    } catch (erro) { if (atual === consultaCadastro) area.textContent = erro.message; }
+  }
+  async function carregarResponsaveis(pagina = 1) {
+    const atual = ++consultaResponsaveis;
+    const area = document.querySelector('#responsaveis-admin');
+    const nav = document.querySelector('#paginas-responsaveis');
+    area.textContent = 'Carregando responsáveis…';
+    try {
+      const dados = await obter(`/api/v1/responsaveis/?paciente=${encodeURIComponent(selecionado.id)}&page=${encodeURIComponent(pagina)}`);
+      if (atual !== consultaResponsaveis) return;
+      area.replaceChildren();
+      if (!dados.results.length) area.append(elemento('p', 'Nenhum responsável cadastrado.', 'ajuda'));
+      for (const pessoa of dados.results) {
+        const bloco = elemento('article', '', 'registro');
+        const campos = [['Nome', 'nome'], ['CPF', 'cpf'], ['Vínculo', 'vinculo'], ['Telefone', 'telefone_cifrado'], ['E-mail', 'email'], ['Comprovante', 'comprovante_vinculo_pendente']];
+        for (const [rotulo, chave] of campos) if (pessoa[chave]) bloco.append(elemento('p', `${rotulo}: ${pessoa[chave]}`));
+        bloco.append(elemento('p', `Ativo: ${pessoa.ativo ? 'sim' : 'não'} · Responsável principal: ${pessoa.eh_responsavel_legal_principal ? 'sim' : 'não'} · Guarda compartilhada: ${pessoa.guarda_compartilhada ? 'sim' : 'não'}`));
+        area.append(bloco);
+      }
+      paginar(nav, dados, carregarResponsaveis);
+    } catch (erro) { if (atual === consultaResponsaveis) { area.textContent = erro.message; nav.replaceChildren(); } }
   }
   async function enviar(url, corpo) {
     const token = document.querySelector('#form-avaliacao [name=csrfmiddlewaretoken]').value;
@@ -110,6 +151,25 @@
         opcaoOrigem.dataset.protocolo = avaliacao.protocolo; origem.append(opcaoOrigem);
         const bloco = elemento('article', '', 'registro');
         bloco.append(elemento('h4', `${avaliacao.data} · ${avaliacao.protocolo}`));
+        bloco.append(elemento('p', `Autoria: ${avaliacao.autor}`, 'meta'));
+        if (avaliacao.corrige) bloco.append(elemento('p', 'Correção de uma versão anterior.', 'meta'));
+        if (avaliacao.corrigida) bloco.append(elemento('p', 'Versão corrigida; mantida no histórico.', 'meta'));
+        if (!avaliacao.corrigida) {
+          const corrigir = elemento('button', 'Corrigir avaliação', 'secundario'); corrigir.type = 'button';
+          corrigir.addEventListener('click', () => {
+            document.querySelector('#corrige-avaliacao').value = avaliacao.id;
+            document.querySelector('#data-avaliacao').value = avaliacao.data;
+            document.querySelector('#protocolo').value = avaliacao.protocolo;
+            document.querySelector('#observacoes-avaliacao').value = avaliacao.observacoes;
+            document.querySelector('#dificuldades').value = avaliacao.dificuldades.map(x => x.descricao).join('\n');
+            if (avaliacao.origem && !Array.from(origem.options).some(o => o.value === avaliacao.origem)) origem.append(new Option('Avaliação anterior vinculada', avaliacao.origem));
+            origem.value = avaliacao.origem || '';
+            document.querySelector('#edicao-avaliacao').textContent = 'Corrigindo uma avaliação: ao salvar, será criada uma nova versão e as dificuldades precisarão de nova revisão.';
+            document.querySelector('#cancelar-avaliacao').hidden = false;
+            document.querySelector('#form-avaliacao').scrollIntoView({behavior:'smooth'});
+          });
+          bloco.append(corrigir);
+        }
         bloco.append(elemento('p', avaliacao.origem ? 'Reavaliação vinculada a uma avaliação anterior.' : 'Avaliação inicial.', 'meta'));
         if (avaliacao.observacoes) bloco.append(elemento('p', avaliacao.observacoes));
         for (const dificuldade of avaliacao.dificuldades) {
@@ -118,7 +178,7 @@
           item.append(elemento('p', `Proposta inicial: ${dificuldade.proposta}`));
           const lista = dificuldade.revisoes;
           const ultima = lista[lista.length - 1];
-          if (ultima && ultima.decisao === 'aprovado') {
+          if (!avaliacao.corrigida && ultima && ultima.decisao === 'aprovado') {
             const linha = elemento('div', '', 'opcao-plano');
             const label = elemento('label', '', 'opcao-label');
             const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = ultima.id;
@@ -128,6 +188,7 @@
           }
           for (const revisao of lista) item.append(elemento('p', `${revisao.decisao === 'aprovado' ? 'Aprovado' : 'Não incluído'}: ${revisao.texto}`, 'meta'));
           if (!lista.length) item.append(elemento('p', 'Pendente de revisão', 'assinatura'));
+          if (avaliacao.corrigida) { bloco.append(item); continue; }
           const texto = document.createElement('textarea'); texto.rows = 2; texto.maxLength = 2000;
           texto.setAttribute('aria-label', 'Texto revisado do objetivo ou justificativa');
           texto.placeholder = 'Escreva o objetivo revisado ou a justificativa';
@@ -162,9 +223,9 @@
     const pacienteId = selecionado.id;
     const dificuldades = document.querySelector('#dificuldades').value.split('\n').map(x => x.trim()).filter(Boolean);
     if (dificuldades.length > 50 || dificuldades.some(x => x.length > 500)) { mensagem.textContent = 'Informe até 50 dificuldades de até 500 caracteres cada.'; return; }
-    const dados = {paciente: pacienteId, protocolo: document.querySelector('#protocolo').value, data: document.querySelector('#data-avaliacao').value, origem: document.querySelector('#origem-avaliacao').value || null, dificuldades_informadas: dificuldades, observacoes: document.querySelector('#observacoes-avaliacao').value};
+    const dados = {paciente: pacienteId, protocolo: document.querySelector('#protocolo').value, data: document.querySelector('#data-avaliacao').value, origem: document.querySelector('#origem-avaliacao').value || null, corrige: document.querySelector('#corrige-avaliacao').value || null, dificuldades_informadas: dificuldades, observacoes: document.querySelector('#observacoes-avaliacao').value};
     mensagem.textContent = ''; botao.disabled = true;
-    try { await enviar('/api/v1/avaliacoes-fono/', dados); if (selecionado.id === pacienteId) { formulario.reset(); mensagem.textContent = 'Avaliação salva. Revise as propostas no histórico.'; await carregarAvaliacoes(); } }
+    try { await enviar('/api/v1/avaliacoes-fono/', dados); if (selecionado.id === pacienteId) { formulario.reset(); document.querySelector('#edicao-avaliacao').textContent = ''; document.querySelector('#cancelar-avaliacao').hidden = true; mensagem.textContent = 'Avaliação salva. Revise as propostas no histórico.'; await carregarAvaliacoes(); } }
     catch (erro) { mensagem.textContent = erro.message; }
     finally { botao.disabled = false; }
   });
@@ -187,6 +248,29 @@
       for (const plano of dados.results) {
         const bloco = elemento('article', '', 'registro');
         bloco.append(elemento('h4', `Plano de ${plano.inicio} até ${plano.fim}`));
+        bloco.append(elemento('p', `Autoria: ${plano.autor}`, 'meta'));
+        if (plano.corrige) bloco.append(elemento('p', 'Correção de uma versão anterior.', 'meta'));
+        if (plano.corrigido) bloco.append(elemento('p', 'Versão corrigida; mantida no histórico.', 'meta'));
+        if (!plano.corrigido) {
+          const corrigir = elemento('button', 'Corrigir plano', 'secundario'); corrigir.type = 'button';
+          corrigir.addEventListener('click', () => {
+            const form = document.querySelector('#form-plano'); form.reset();
+            document.querySelector('#corrige-plano').value = plano.id;
+            document.querySelector('#inicio-plano').value = plano.inicio;
+            document.querySelector('#fim-plano').value = plano.fim;
+            document.querySelector('#recursos-plano').value = plano.recursos;
+            document.querySelector('#orientacoes-plano').value = plano.orientacoes;
+            let pendentes = 0;
+            for (const item of plano.itens) {
+              const linha = Array.from(document.querySelectorAll('.opcao-plano')).find(el => el.querySelector('input').value === item.revisao);
+              if (linha) { linha.querySelector('input').checked = true; linha.querySelector('textarea').value = item.meta; } else pendentes++;
+            }
+            document.querySelector('#edicao-plano').textContent = pendentes ? 'Alguns objetivos não estão aprovados na página atual. Selecione novamente os objetivos para corrigir o plano.' : 'Corrigindo plano: ao salvar, será criada uma nova versão.';
+            document.querySelector('#cancelar-plano').hidden = false;
+            form.scrollIntoView({behavior:'smooth'});
+          });
+          bloco.append(corrigir);
+        }
         bloco.append(elemento('span', 'Sem assinatura', 'assinatura'));
         for (const item of plano.itens) {
           objetivoSessao.append(new Option(`${plano.inicio} · ${item.objetivo}`, item.id));
@@ -210,14 +294,14 @@
     const pacienteId = selecionado.id;
     const itens = Array.from(document.querySelectorAll('.opcao-plano')).filter(el => el.querySelector('input').checked).map(el => ({revisao: el.querySelector('input').value, meta: el.querySelector('textarea').value.trim()}));
     if (!itens.length || itens.some(item => !item.meta)) { mensagem.textContent = 'Selecione ao menos um objetivo e informe uma meta para cada um.'; return; }
-    const dados = {paciente: pacienteId, inicio: document.querySelector('#inicio-plano').value, fim: document.querySelector('#fim-plano').value, recursos: document.querySelector('#recursos-plano').value, orientacoes: document.querySelector('#orientacoes-plano').value, itens_informados: itens};
+    const dados = {paciente: pacienteId, corrige: document.querySelector('#corrige-plano').value || null, inicio: document.querySelector('#inicio-plano').value, fim: document.querySelector('#fim-plano').value, recursos: document.querySelector('#recursos-plano').value, orientacoes: document.querySelector('#orientacoes-plano').value, itens_informados: itens};
     mensagem.textContent = ''; botao.disabled = true;
-    try { await enviar('/api/v1/planos-fono/', dados); if (selecionado.id === pacienteId) { form.reset(); mensagem.textContent = 'Plano de teste salvo sem assinatura.'; await carregarPlanos(); } }
+    try { await enviar('/api/v1/planos-fono/', dados); if (selecionado.id === pacienteId) { form.reset(); document.querySelector('#edicao-plano').textContent = ''; document.querySelector('#cancelar-plano').hidden = true; mensagem.textContent = 'Plano de teste salvo sem assinatura.'; await carregarPlanos(); } }
     catch (erro) { mensagem.textContent = erro.message; }
     finally { botao.disabled = false; }
   });
   const codigosTentativa = [['I', 'Independente'], ['E', 'Erro'], ['G', 'Gestual'], ['VP', 'Verbal parcial'], ['VT', 'Verbal total'], ['FP', 'Físico parcial'], ['FT', 'Físico total'], ['VS', 'Visual / posicional']];
-  if (fono) document.querySelector('#adicionar-tentativa').addEventListener('click', () => {
+  function adicionarTentativa(valor = '') {
     const lista = document.querySelector('#tentativas-sessao');
     if (lista.children.length >= 100) { document.querySelector('#mensagem-sessao').textContent = 'Limite de 100 tentativas por sessão.'; return; }
     const linha = elemento('div', '', 'linha-tentativa');
@@ -225,8 +309,9 @@
     select.append(new Option('Selecione o resultado', ''));
     for (const [codigo, descricao] of codigosTentativa) select.append(new Option(`${codigo} — ${descricao}`, codigo));
     const remover = elemento('button', 'Remover', 'secundario'); remover.type = 'button'; remover.addEventListener('click', () => linha.remove());
-    linha.append(select, remover); lista.append(linha);
-  });
+    select.value = valor; linha.append(select, remover); lista.append(linha);
+  }
+  if (fono) document.querySelector('#adicionar-tentativa').addEventListener('click', () => adicionarTentativa());
   async function carregarSessoes(pagina = 1) {
     const atual = ++consultaSessao;
     const historico = document.querySelector('#historico-sessoes');
@@ -240,6 +325,28 @@
       for (const sessao of dados.results) {
         const bloco = elemento('article', '', 'registro');
         bloco.append(elemento('h4', `${sessao.data} · ${sessao.atividade}`));
+        bloco.append(elemento('p', `Autoria: ${sessao.autor}`, 'meta'));
+        if (sessao.corrige) bloco.append(elemento('p', 'Correção de uma versão anterior.', 'meta'));
+        if (sessao.corrigida) bloco.append(elemento('p', 'Versão corrigida; mantida no histórico e excluída da evolução.', 'meta'));
+        if (!sessao.corrigida) {
+          const corrigir = elemento('button', 'Corrigir sessão', 'secundario'); corrigir.type = 'button';
+          corrigir.addEventListener('click', () => {
+            const form = document.querySelector('#form-sessao'); form.reset();
+            document.querySelector('#corrige-sessao').value = sessao.id;
+            document.querySelector('#data-sessao').value = sessao.data;
+            document.querySelector('#atividade-sessao').value = sessao.atividade;
+            document.querySelector('#observacoes-sessao').value = sessao.observacoes;
+            const objetivo = document.querySelector('#objetivo-sessao');
+            if (sessao.objetivo && !Array.from(objetivo.options).some(o => o.value === sessao.objetivo)) objetivo.append(new Option(sessao.objetivo_texto || 'Objetivo vinculado', sessao.objetivo));
+            objetivo.value = sessao.objetivo || '';
+            document.querySelector('#tentativas-sessao').replaceChildren();
+            for (const codigo of sessao.resultados.tentativas) adicionarTentativa(codigo);
+            document.querySelector('#edicao-sessao').textContent = 'Corrigindo sessão: ao salvar, uma nova versão substituirá a anterior nos gráficos.';
+            document.querySelector('#cancelar-sessao').hidden = false;
+            form.scrollIntoView({behavior:'smooth'});
+          });
+          bloco.append(corrigir);
+        }
         if (sessao.objetivo_texto) bloco.append(elemento('p', `Objetivo: ${sessao.objetivo_texto}`));
         const r = sessao.resultados;
         bloco.append(elemento('p', `Tentativas: ${r.total}${r.total ? ` · ${r.tentativas.join(', ')}` : ' · Sem dados'}`));
@@ -258,9 +365,9 @@
     const botao = form.querySelector('button[type=submit]');
     const pacienteId = selecionado.id;
     const tentativas = Array.from(document.querySelectorAll('#tentativas-sessao select')).map(select => select.value);
-    const dados = {paciente: pacienteId, data: document.querySelector('#data-sessao').value, atividade: document.querySelector('#atividade-sessao').value, objetivo: document.querySelector('#objetivo-sessao').value || null, observacoes: document.querySelector('#observacoes-sessao').value, tentativas};
+    const dados = {paciente: pacienteId, corrige: document.querySelector('#corrige-sessao').value || null, data: document.querySelector('#data-sessao').value, atividade: document.querySelector('#atividade-sessao').value, objetivo: document.querySelector('#objetivo-sessao').value || null, observacoes: document.querySelector('#observacoes-sessao').value, tentativas};
     mensagem.textContent = ''; botao.disabled = true;
-    try { await enviar('/api/v1/sessoes-fono/', dados); if (selecionado.id === pacienteId) { form.reset(); document.querySelector('#tentativas-sessao').replaceChildren(); mensagem.textContent = 'Sessão de teste salva sem assinatura.'; await carregarSessoes(); } }
+    try { await enviar('/api/v1/sessoes-fono/', dados); if (selecionado.id === pacienteId) { form.reset(); document.querySelector('#edicao-sessao').textContent = ''; document.querySelector('#cancelar-sessao').hidden = true; document.querySelector('#tentativas-sessao').replaceChildren(); consultaEvolucao++; document.querySelector('#resultado-evolucao').textContent = 'A sessão foi salva. Atualize a evolução para ver os resultados.'; mensagem.textContent = 'Sessão de teste salva sem assinatura.'; await carregarSessoes(); } }
     catch (erro) { mensagem.textContent = erro.message; }
     finally { botao.disabled = false; }
   });
@@ -301,6 +408,12 @@
         resultado.append(bloco);
       }
     } catch (erro) { if (atual === consultaEvolucao) resultado.textContent = 'Não foi possível carregar a evolução. Confira o período de até 366 dias e tente novamente.'; }
+  });
+  if (fono) for (const tipo of ['avaliacao', 'plano', 'sessao']) document.querySelector(`#cancelar-${tipo}`).addEventListener('click', () => {
+    document.querySelector(`#form-${tipo}`).reset();
+    document.querySelector(`#edicao-${tipo}`).textContent = '';
+    document.querySelector(`#cancelar-${tipo}`).hidden = true;
+    if (tipo === 'sessao') document.querySelector('#tentativas-sessao').replaceChildren();
   });
   carregarPacientes();
 })();

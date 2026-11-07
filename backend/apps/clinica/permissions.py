@@ -4,7 +4,20 @@ Permissoes de autorizacao da API.
 Separadas das views pra facilitar teste e revisao independente.
 """
 
+from django.conf import settings
 from rest_framework.permissions import BasePermission
+
+
+def admin_clinico_teste(user):
+    """Exceção deliberada e restrita ao ambiente de testes com dados fictícios."""
+    return bool(
+        settings.DEBUG
+        and getattr(settings, "WEB_CONSULTA_HABILITADA", False)
+        and getattr(settings, "ADMIN_CLINICO_DADOS_FICTICIOS", False)
+        and user.is_authenticated
+        and user.is_active
+        and getattr(user, "eh_admin", False)
+    )
 
 
 class IsAdmin(BasePermission):

@@ -1,5 +1,7 @@
 # Permissões de cadastro e fronteira com o Lote 3
 
+> Para dados fictícios, a configuração explícita de desenvolvimento permite ao admin acessar e operar dados clínicos, mantendo autoria real. Essa exceção não é regra de produção.
+
 **Atualização:** a API inicial de Registro agora aplica o acesso por categoria em
 lista e detalhe. A tabela de Registro ao final registra os requisitos que orientaram
 a implementação; exportação e tarefas clínicas seguem pendentes.

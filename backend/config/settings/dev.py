@@ -21,3 +21,6 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # Interface de validação, indisponível por padrão nos demais ambientes.
 WEB_CONSULTA_HABILITADA = True
 LOGIN_REDIRECT_URL = "web-inicio"
+
+# Acesso administrativo clínico para dados exclusivamente fictícios neste ambiente.
+ADMIN_CLINICO_DADOS_FICTICIOS = True

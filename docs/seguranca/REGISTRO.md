@@ -1,5 +1,11 @@
 # Registro: autoria e privacidade
 
+**Exceção para desenvolvimento:** com `DEBUG`, `WEB_CONSULTA_HABILITADA` e
+`ADMIN_CLINICO_DADOS_FICTICIOS` ativos, admin pode ler e criar registros de teste
+de todas as categorias, com autoria atribuída à conta admin. Em novos registros
+fictícios, a categoria simulada é indicada explicitamente; não representa
+qualificação profissional. A exceção não autoriza uso com dados reais.
+
 O Registro armazena paciente, autor, categoria histórica, resumo e detalhe cifrados
 com a chave A, indicador de compartilhamento e data de criação. O servidor define
 autor e categoria a partir do profissional autenticado; esses campos não são aceitos

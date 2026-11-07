@@ -91,7 +91,8 @@ ICP-Brasil e os controles para produção continuam pendentes.
 
 A interface de sessões apresenta objetivos dos planos na página atual do histórico
 de planos; navegue até outra página para selecionar um objetivo antigo. A API exige
-fonoaudióloga vinculada ao paciente; a assinatura é informada como ausente. Textos
+fonoaudióloga vinculada ao paciente ou admin no modo explícito de dados fictícios;
+a assinatura é informada como ausente. Textos
 e tentativas são cifrados. SQLite não aplica as triggers; owner ou superusuário do
 PostgreSQL pode desativá-las. A interface e API estão restritas ao desenvolvimento.
 
