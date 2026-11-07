@@ -3,5 +3,18 @@
 <div class="aviso">Ambiente de desenvolvimento: utilize apenas dados fictícios. Os registros estão sem assinatura.</div>
 <div class="grade"><section class="painel"><div class="titulo"><div><span class="rotulo">ACOMPANHAMENTO</span><h2>Pacientes</h2></div></div><p class="ajuda">Selecione um paciente para consultar os registros.</p><div id="pacientes" aria-live="polite">Carregando pacientes…</div><nav class="paginacao" id="paginas" aria-label="Paginação de pacientes"></nav></section>
 <section class="painel"><span class="rotulo">PRONTUÁRIO</span><h2 id="nome-paciente">Selecione um paciente</h2><div id="registros" aria-live="polite"><p class="ajuda">Os registros disponíveis aparecerão aqui.</p></div><nav class="paginacao" id="paginas-registros" aria-label="Paginação de registros"></nav></section></div>
-<div id="config-web" data-clinico="{% if clinico %}true{% else %}false{% endif %}"></div><script src="{% static 'clinica/web.js' %}" defer></script>
+{% if fono %}
+<section id="avaliacoes-fono" class="painel avaliacao" hidden>
+<span class="rotulo">FONOAUDIOLOGIA · TESTES</span><h2>Avaliações e objetivos</h2>
+<p class="ajuda">Registre dificuldades fictícias. Cada uma gera um rascunho para revisão; não há cálculo de protocolo.</p>
+<form id="form-avaliacao">{% csrf_token %}
+<label for="protocolo">Protocolo ou tipo de avaliação</label><input id="protocolo" maxlength="200" required placeholder="Ex.: Checklist Motor-Oral">
+<label for="data-avaliacao">Data da avaliação</label><input id="data-avaliacao" type="date" required>
+<label for="origem-avaliacao">Avaliação anterior (para reavaliação)</label><select id="origem-avaliacao"><option value="">Avaliação inicial</option></select>
+<label for="dificuldades">Dificuldades observadas — uma por linha</label><textarea id="dificuldades" rows="4" placeholder="Uma dificuldade fictícia por linha"></textarea>
+<label for="observacoes-avaliacao">Observações</label><textarea id="observacoes-avaliacao" rows="2" maxlength="5000"></textarea>
+<button class="principal" type="submit">Salvar avaliação</button><p id="mensagem-avaliacao" role="status"></p></form>
+<h3>Histórico e propostas</h3><div id="historico-avaliacoes" aria-live="polite"></div><nav id="paginas-avaliacoes" class="paginacao" aria-label="Paginação de avaliações"></nav>
+</section>{% endif %}
+<div id="config-web" data-clinico="{% if clinico %}true{% else %}false{% endif %}" data-fono="{% if fono %}true{% else %}false{% endif %}"></div><script src="{% static 'clinica/web.js' %}" defer></script>
 {% endblock %}

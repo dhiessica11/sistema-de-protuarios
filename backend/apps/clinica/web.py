@@ -38,4 +38,8 @@ def inicio(request):
     habilitada()
     if not (request.user.eh_admin or request.user.eh_profissional_clinico):
         raise PermissionDenied
-    return render(request, "clinica/inicio.html", {"clinico": request.user.eh_profissional_clinico})
+    return render(
+        request,
+        "clinica/inicio.html",
+        {"clinico": request.user.eh_profissional_clinico, "fono": request.user.tipo == "fono"},
+    )

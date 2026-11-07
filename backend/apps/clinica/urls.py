@@ -1,6 +1,8 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from . import views
+from .avaliacao_fono_api import AvaliacaoViewSet, RevisaoViewSet
 from .registro_api import RegistroViewSet
 
 router = DefaultRouter()
@@ -14,4 +16,12 @@ router.register("paciente-equipe", views.PacienteEquipeViewSet, basename="pacien
 
 router.register("registros", RegistroViewSet, basename="registro")
 
-urlpatterns = router.urls
+router.register("avaliacoes-fono", AvaliacaoViewSet, basename="avaliacao-fono")
+
+urlpatterns = [
+    path(
+        "dificuldades-fono/<uuid:dificuldade_pk>/revisoes/",
+        RevisaoViewSet.as_view({"post": "create"}),
+        name="revisao-fono",
+    )
+] + router.urls

@@ -527,3 +527,42 @@ class Registro(UUIDModel):
                 name="registro_retificacao_com_contato",
             ),
         ]
+
+
+class AvaliacaoFono(UUIDModel):
+    """Avaliação de teste; reavaliações preservam a aplicação anterior."""
+
+    paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, related_name="avaliacoes_fono")
+    autor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="avaliacoes_fono")
+    origem = models.ForeignKey("self", on_delete=models.PROTECT, null=True, blank=True)
+    data = models.DateField()
+    protocolo = EncryptedTextField(key="A")
+    observacoes = EncryptedTextField(key="A", blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+
+class DificuldadeFono(UUIDModel):
+    """Cada dificuldade registrada tem exatamente uma proposta pendente."""
+
+    avaliacao = models.ForeignKey(
+        AvaliacaoFono, on_delete=models.PROTECT, related_name="dificuldades"
+    )
+    descricao = EncryptedTextField(key="A")
+    proposta = EncryptedTextField(key="A")
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+
+class RevisaoObjetivoFono(UUIDModel):
+    """Decisões são adicionadas ao histórico, sem sobrescrever revisões anteriores."""
+
+    dificuldade = models.ForeignKey(
+        DificuldadeFono, on_delete=models.PROTECT, related_name="revisoes"
+    )
+    autor = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, related_name="revisoes_objetivo_fono"
+    )
+    decisao = models.CharField(
+        max_length=12, choices=[("aprovado", "Aprovado"), ("descartado", "Descartado")]
+    )
+    texto = EncryptedTextField(key="A")
+    criado_em = models.DateTimeField(auto_now_add=True)

@@ -61,8 +61,10 @@ Abrir no navegador:
 
 A interface web inicial usa a conta existente e apresenta pacientes conforme o perfil;
 profissionais podem consultar os registros acessíveis pela API. A administração não
-vê texto clínico, e TI não acessa essa tela. Ainda não há cadastro, edição, criação
-de registros ou assinatura pela interface. Ela só está habilitada nas configurações
+vê texto clínico, e TI não acessa essa tela. Profissionais de fono vinculados podem
+criar avaliações de teste, registrar dificuldades e revisar as propostas geradas.
+Reavaliações são vinculadas a uma avaliação anterior do mesmo protocolo. A interface
+ainda não possui cadastro de pacientes, criação de registros clínicos ou assinatura. Ela só está habilitada nas configurações
 de desenvolvimento e não autoriza o uso com dados reais. Na rede local de testes,
 use o endereço do servidor na porta 8000; não exponha o servidor de desenvolvimento
 à internet.
