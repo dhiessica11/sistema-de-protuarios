@@ -3,3 +3,5 @@
 .avaliacao{margin:20px 0 50px}.avaliacao form{display:grid;gap:8px;max-width:700px}.avaliacao label{font-size:.85rem;font-weight:650;margin-top:8px}.avaliacao input,.avaliacao select,.avaliacao textarea{width:100%;border:1px solid #ccdcd0;border-radius:8px;padding:10px;font:inherit}.avaliacao h3{margin-top:30px}.objetivo{background:#f7faf8;border-radius:10px;padding:15px;margin:12px 0}.objetivo textarea{margin-top:8px}.objetivo p{overflow-wrap:anywhere;white-space:pre-wrap}
 
 .avaliacao fieldset{border:1px solid #dce8df;border-radius:10px;margin:12px 0;padding:12px}.opcao-plano{border-bottom:1px solid #edf1ee;padding:12px 0}.avaliacao .opcao-label{display:flex;gap:8px;align-items:baseline}.avaliacao .opcao-label input{width:auto}.opcao-plano textarea{margin-top:8px}
+
+.linha-tentativa{display:flex;gap:8px;margin:8px 0}.linha-tentativa select{flex:1}

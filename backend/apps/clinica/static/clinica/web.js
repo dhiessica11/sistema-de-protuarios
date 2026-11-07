@@ -9,6 +9,7 @@
   const areaAvaliacao = document.querySelector('#avaliacoes-fono');
   let consultaAvaliacao = 0;
   let consultaPlano = 0;
+  let consultaSessao = 0;
   let selecionado = null;
   let requisicao = 0;
 
@@ -60,7 +61,7 @@
       return;
     }
     carregarRegistros();
-    if (fono) { document.querySelector('#form-avaliacao').reset(); document.querySelector('#mensagem-avaliacao').textContent = ''; areaAvaliacao.hidden = false; document.querySelector('#planos-fono').hidden = false; document.querySelector('#form-plano').reset(); document.querySelector('#mensagem-plano').textContent = ''; carregarAvaliacoes(); carregarPlanos(); }
+    if (fono) { document.querySelector('#form-avaliacao').reset(); document.querySelector('#mensagem-avaliacao').textContent = ''; areaAvaliacao.hidden = false; document.querySelector('#planos-fono').hidden = false; document.querySelector('#form-plano').reset(); document.querySelector('#mensagem-plano').textContent = ''; document.querySelector('#sessoes-fono').hidden = false; document.querySelector('#form-sessao').reset(); document.querySelector('#tentativas-sessao').replaceChildren(); document.querySelector('#mensagem-sessao').textContent = ''; carregarAvaliacoes(); carregarPlanos(); carregarSessoes(); }
   }
   async function carregarRegistros(pagina = 1) {
     const atual = ++requisicao;
@@ -171,6 +172,8 @@
     const historico = document.querySelector('#historico-planos');
     const nav = document.querySelector('#paginas-planos');
     historico.textContent = 'Carregando planos…';
+    const objetivoSessao = document.querySelector('#objetivo-sessao');
+    objetivoSessao.replaceChildren(new Option('Sem objetivo vinculado', ''));
     try {
       const dados = await obter(`/api/v1/planos-fono/?paciente=${encodeURIComponent(selecionado.id)}&page=${encodeURIComponent(pagina)}`);
       if (atual !== consultaPlano) return;
@@ -181,6 +184,7 @@
         bloco.append(elemento('h4', `Plano de ${plano.inicio} até ${plano.fim}`));
         bloco.append(elemento('span', 'Sem assinatura', 'assinatura'));
         for (const item of plano.itens) {
+          objetivoSessao.append(new Option(`${plano.inicio} · ${item.objetivo}`, item.id));
           bloco.append(elemento('p', `Dificuldade: ${item.dificuldade}`));
           bloco.append(elemento('p', `Objetivo: ${item.objetivo}`));
           bloco.append(elemento('p', `Meta: ${item.meta}`));
@@ -203,6 +207,54 @@
     const dados = {paciente: pacienteId, inicio: document.querySelector('#inicio-plano').value, fim: document.querySelector('#fim-plano').value, recursos: document.querySelector('#recursos-plano').value, orientacoes: document.querySelector('#orientacoes-plano').value, itens_informados: itens};
     mensagem.textContent = ''; botao.disabled = true;
     try { await enviar('/api/v1/planos-fono/', dados); if (selecionado.id === pacienteId) { form.reset(); mensagem.textContent = 'Plano de teste salvo sem assinatura.'; await carregarPlanos(); } }
+    catch (erro) { mensagem.textContent = erro.message; }
+    finally { botao.disabled = false; }
+  });
+  const codigosTentativa = [['I', 'Independente'], ['E', 'Erro'], ['G', 'Gestual'], ['VP', 'Verbal parcial'], ['VT', 'Verbal total'], ['FP', 'Físico parcial'], ['FT', 'Físico total'], ['VS', 'Visual / posicional']];
+  if (fono) document.querySelector('#adicionar-tentativa').addEventListener('click', () => {
+    const lista = document.querySelector('#tentativas-sessao');
+    if (lista.children.length >= 100) { document.querySelector('#mensagem-sessao').textContent = 'Limite de 100 tentativas por sessão.'; return; }
+    const linha = elemento('div', '', 'linha-tentativa');
+    const select = document.createElement('select'); select.required = true; select.setAttribute('aria-label', 'Resultado da tentativa');
+    select.append(new Option('Selecione o resultado', ''));
+    for (const [codigo, descricao] of codigosTentativa) select.append(new Option(`${codigo} — ${descricao}`, codigo));
+    const remover = elemento('button', 'Remover', 'secundario'); remover.type = 'button'; remover.addEventListener('click', () => linha.remove());
+    linha.append(select, remover); lista.append(linha);
+  });
+  async function carregarSessoes(pagina = 1) {
+    const atual = ++consultaSessao;
+    const historico = document.querySelector('#historico-sessoes');
+    const nav = document.querySelector('#paginas-sessoes');
+    historico.textContent = 'Carregando sessões…';
+    try {
+      const dados = await obter(`/api/v1/sessoes-fono/?paciente=${encodeURIComponent(selecionado.id)}&page=${encodeURIComponent(pagina)}`);
+      if (atual !== consultaSessao) return;
+      historico.replaceChildren();
+      if (!dados.results.length) historico.append(elemento('p', 'Nenhuma sessão cadastrada.', 'ajuda'));
+      for (const sessao of dados.results) {
+        const bloco = elemento('article', '', 'registro');
+        bloco.append(elemento('h4', `${sessao.data} · ${sessao.atividade}`));
+        if (sessao.objetivo_texto) bloco.append(elemento('p', `Objetivo: ${sessao.objetivo_texto}`));
+        const r = sessao.resultados;
+        bloco.append(elemento('p', `Tentativas: ${r.total}${r.total ? ` · ${r.tentativas.join(', ')}` : ' · Sem dados'}`));
+        if (r.total) bloco.append(elemento('p', `Independentes: ${r.percentual_independente}% · Com ajuda: ${r.percentual_ajuda}% · Erros: ${r.percentual_erro}%`, 'meta'));
+        if (sessao.observacoes) bloco.append(elemento('p', sessao.observacoes));
+        bloco.append(elemento('span', 'Sem assinatura', 'assinatura'));
+        historico.append(bloco);
+      }
+      paginar(nav, dados, carregarSessoes);
+    } catch (erro) { if (atual === consultaSessao) { historico.textContent = erro.message; nav.replaceChildren(); } }
+  }
+  if (fono) document.querySelector('#form-sessao').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    const form = evento.currentTarget;
+    const mensagem = document.querySelector('#mensagem-sessao');
+    const botao = form.querySelector('button[type=submit]');
+    const pacienteId = selecionado.id;
+    const tentativas = Array.from(document.querySelectorAll('#tentativas-sessao select')).map(select => select.value);
+    const dados = {paciente: pacienteId, data: document.querySelector('#data-sessao').value, atividade: document.querySelector('#atividade-sessao').value, objetivo: document.querySelector('#objetivo-sessao').value || null, observacoes: document.querySelector('#observacoes-sessao').value, tentativas};
+    mensagem.textContent = ''; botao.disabled = true;
+    try { await enviar('/api/v1/sessoes-fono/', dados); if (selecionado.id === pacienteId) { form.reset(); document.querySelector('#tentativas-sessao').replaceChildren(); mensagem.textContent = 'Sessão de teste salva sem assinatura.'; await carregarSessoes(); } }
     catch (erro) { mensagem.textContent = erro.message; }
     finally { botao.disabled = false; }
   });

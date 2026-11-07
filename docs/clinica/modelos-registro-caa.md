@@ -2,7 +2,8 @@
 
 Levantamento de três arquivos enviados pela clínica: `A- REGISTRO NOVO.xlsx`,
 `CAA_DAGG3_Espaco_Desenvolver_MODELO.xlsx` e `REGISTRO PARA IMPRIMIR 2.pdf`.
-Este documento descreve requisitos e verificações, não implementa esses fluxos.
+Este documento descreve requisitos e verificações; a seção de estado atual distingue
+o fluxo experimental já implementado dos demais itens pendentes.
 Os arquivos e seu conteúdo clínico não devem ser incluídos no repositório.
 
 ## Registro por tentativa
@@ -21,13 +22,14 @@ impor um limite único sem decisão da clínica. A extração de texto do PDF re
 erros de compressão, portanto a leitura deve ser conferida visualmente antes de
 reproduzir integralmente seus campos ou apresentação.
 
-Proposta para o sistema: registrar sessão, profissional, vínculo ao paciente e,
-quando aplicável, ao objetivo/plano, data, atividade, observações e tentativas
-individuais; gerar contagens e percentuais explicitando denominador e códigos.
-Sem tentativas registradas, exibir «sem dados» em vez de concluir 0% de erro ou
-independência. O modelo Excel retorna zero nas divisões sem tentativas: a mudança
-proposta deve ser validada com a clínica. Manter versões anteriores e respeitar
-as permissões da categoria; registrar autor e proveniência do lançamento.
+O fluxo experimental registra sessão, profissional, paciente e, opcionalmente,
+um objetivo de plano do mesmo paciente, data, atividade, observações e até 100
+tentativas. Apresenta contagens e percentuais por tentativa: I como independente,
+E como erro e os demais códigos como ajuda, conforme a fórmula da planilha. Sem
+tentativas, os percentuais ficam ausentes e a tela informa «sem dados». O modelo
+Excel retorna zero nesse caso: a mudança proposta e a interpretação dos códigos
+devem ser validadas com a clínica. O PostgreSQL protege os registros contra
+alteração ou exclusão, sujeito às limitações de privilégio descritas abaixo.
 
 ## CAA / DAGG-3
 
@@ -76,13 +78,18 @@ itens e cenários sintéticos, sem transcrever o conteúdo protegido para o cód
 
 ## Relação com o estado atual
 
-O projeto já possui fluxo experimental de avaliação por texto, propostas
-revisáveis e planos com metas para dados fictícios. Ele ainda não implementa os
-itens DAGG-3, pontuação, tentativas, registro de sessões, indicadores, gráficos,
-impressão destes formulários ou integração com as planilhas. O módulo de assinatura
+O projeto possui fluxos experimentais de avaliação por texto, propostas
+revisáveis, planos com metas e sessões por tentativa para dados fictícios. Ainda
+não implementa os itens DAGG-3, suas escalas de apoio, pontuação ou indicadores,
+gráficos, impressão destes formulários ou integração com as planilhas. O módulo de assinatura
 ICP-Brasil e os controles para produção continuam pendentes.
 
-Próximo incremento recomendado: registro estruturado de sessões e tentativas,
-com dados fictícios, autorização, histórico, teste de inconsistências e sem usar
-critérios de aquisição como diagnóstico. Depois validar CAA, suas regras e licenças
-com a responsável antes de implementar metas e relatórios específicos do DAGG-3.
+A interface de sessões apresenta objetivos dos planos na página atual do histórico
+de planos; navegue até outra página para selecionar um objetivo antigo. A API exige
+fonoaudióloga vinculada ao paciente; a assinatura é informada como ausente. Textos
+e tentativas são cifrados. SQLite não aplica as triggers; owner ou superusuário do
+PostgreSQL pode desativá-las. A interface e API estão restritas ao desenvolvimento.
+
+Próximo incremento: validar CAA, suas regras e licenças com a responsável e
+desenvolver acompanhamento longitudinal, gráficos e relatórios sem apresentar
+critérios de aquisição como diagnósticos.

@@ -5,6 +5,7 @@ from . import views
 from .avaliacao_fono_api import AvaliacaoViewSet, RevisaoViewSet
 from .plano_fono_api import PlanoViewSet
 from .registro_api import RegistroViewSet
+from .sessao_fono_api import SessaoViewSet
 
 router = DefaultRouter()
 router.register("clinicas", views.ClinicaViewSet)
@@ -19,6 +20,7 @@ router.register("registros", RegistroViewSet, basename="registro")
 
 router.register("avaliacoes-fono", AvaliacaoViewSet, basename="avaliacao-fono")
 router.register("planos-fono", PlanoViewSet, basename="plano-fono")
+router.register("sessoes-fono", SessaoViewSet, basename="sessao-fono")
 
 urlpatterns = [
     path(

@@ -598,3 +598,18 @@ class ItemPlanoFono(UUIDModel):
         constraints = [
             models.UniqueConstraint(fields=["plano", "revisao"], name="plano_fono_revisao_unica")
         ]
+
+
+class SessaoFono(UUIDModel):
+    """Registro de sessão de teste com lista cifrada de tentativas."""
+
+    paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, related_name="sessoes_fono")
+    autor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="sessoes_fono")
+    objetivo = models.ForeignKey(
+        ItemPlanoFono, on_delete=models.PROTECT, null=True, blank=True, related_name="sessoes"
+    )
+    data = models.DateField()
+    atividade = EncryptedTextField(key="A")
+    observacoes = EncryptedTextField(key="A", blank=True)
+    tentativas_cifradas = EncryptedTextField(key="A")
+    criado_em = models.DateTimeField(auto_now_add=True)
