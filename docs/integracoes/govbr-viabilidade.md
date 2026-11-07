@@ -5,6 +5,22 @@ substituída pela decisão de adotar assinatura qualificada ICP-Brasil; veja
 [decisão atual](assinatura-icp-brasil.md). Este documento preserva a pesquisa
 anterior. A elegibilidade da clínica privada não foi confirmada.
 
+Atualização em 2026-11-07: o [Serviço de Integração aos Produtos de Identidade
+Digital gov.br](https://www.gov.br/governodigital/pt-br/estrategias-e-governanca-digital/transformacao-digital/servico-de-integracao-aos-produtos-de-identidade-digital-gov.br)
+informa que o acesso à integração é concedido apenas a sistemas de serviço público,
+após análise individual, e que a solicitação deve ser formalizada por agente público.
+Isso torna a integração direta de um prontuário de clínica privada um risco concreto
+de inviabilidade. Não foi confirmada uma exceção ou via indireta aplicável ao caso;
+não presumir que ela exista. A possibilidade jurídica e operacional de qualquer
+alternativa precisa ser confirmada antes de alterar a decisão de produto.
+
+O [art. 6º da Resolução CFFa nº 777/2025](https://www.fonoaudiologia.org.br/resolucoes/resolucoes_html/CFFa_N_777_25.htm)
+aceita assinatura eletrônica avançada **ou** qualificada para documentos ou
+prontuários eletrônicos subscritos por fonoaudiólogos; o texto não exige gov.br
+nominalmente. A escolha obrigatória por gov.br é uma decisão do projeto. A eventual
+adoção de outro meio exigiria nova decisão e análise jurídica, inclusive para CFP
+e COFFITO, ainda pendente.
+
 A responsável informou que a clínica ainda não possui acesso aprovado ao ambiente
 de homologação. Não há credenciais configuradas no ambiente desta tarefa.
 Existe uma [impressão digital interna experimental](integridade-experimental.md),
