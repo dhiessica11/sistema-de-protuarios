@@ -210,6 +210,7 @@ Permissões de escrita e limites da etapa atual:
 No vault Obsidian em `Memoria Claude/02-Pessoal/prontuario-espaco-desenvolver/`.
 
 Registro, retificação e adendo: [documentação](docs/seguranca/REGISTRO.md).
+Modelos adicionais: [registro por tentativa e CAA](docs/clinica/modelos-registro-caa.md).
 Decisão e requisitos para a futura [assinatura ICP-Brasil](docs/integracoes/assinatura-icp-brasil.md).
 
 Separação do perfil técnico: [TI e administração](docs/seguranca/PERFIL-TI.md).
