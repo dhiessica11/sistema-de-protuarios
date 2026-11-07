@@ -5,3 +5,4 @@
 .avaliacao fieldset{border:1px solid #dce8df;border-radius:10px;margin:12px 0;padding:12px}.opcao-plano{border-bottom:1px solid #edf1ee;padding:12px 0}.avaliacao .opcao-label{display:flex;gap:8px;align-items:baseline}.avaliacao .opcao-label input{width:auto}.opcao-plano textarea{margin-top:8px}
 
 .linha-tentativa{display:flex;gap:8px;margin:8px 0}.linha-tentativa select{flex:1}
+.troca-conta{display:block;text-align:center;text-decoration:none}

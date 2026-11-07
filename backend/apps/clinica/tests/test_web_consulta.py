@@ -5,6 +5,7 @@ from django.test import Client, override_settings
 from rest_framework.test import APIClient
 
 from apps.clinica.factories import (
+    AdminFactory,
     FonoFactory,
     PacienteEquipeFactory,
     PacienteFactory,
@@ -91,3 +92,31 @@ def test_filtro_paciente_mantem_privacidade_e_escopo():
     assert "detalhe" not in resposta.data["results"][0]
     assert client.get("/api/v1/registros/", {"paciente": str(outro.pk)}).data["count"] == 0
     assert client.get("/api/v1/registros/", {"paciente": "inválido"}).status_code == 400
+
+
+@override_settings(WEB_CONSULTA_HABILITADA=True)
+def test_ti_pode_trocar_de_conta_sem_acesso_clinico():
+    ti = UsuarioFactory(tipo=TipoUsuario.TI)
+    admin = AdminFactory()
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(ti)
+    restrita = client.get("/")
+    assert restrita.status_code == 403
+    assert "Entrar com outra conta" in restrita.content.decode()
+    assert client.get("/api/v1/pacientes/").status_code == 403
+    entrada = client.get("/entrar/")
+    assert entrada.status_code == 200
+    assert "Você está conectado como" in entrada.content.decode()
+    token = client.cookies["csrftoken"].value
+    resposta = client.post(
+        "/entrar/",
+        {
+            "username": admin.username,
+            "password": "senha-de-teste-12chars",
+            "csrfmiddlewaretoken": token,
+        },
+    )
+    assert resposta.status_code == 302
+    assert client.get("/").status_code == 200
+    assert str(client.session["_auth_user_id"]) == str(admin.pk)
+    assert client.get("/api/v1/registros/").status_code == 403

@@ -3,7 +3,6 @@
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
@@ -20,7 +19,7 @@ def entrar(request):
     habilitada()
     return auth_views.LoginView.as_view(
         template_name="clinica/entrar.html",
-        redirect_authenticated_user=True,
+        redirect_authenticated_user=False,
         next_page="web-inicio",
     )(request)
 
@@ -37,7 +36,7 @@ def sair(request):
 def inicio(request):
     habilitada()
     if not (request.user.eh_admin or request.user.eh_profissional_clinico):
-        raise PermissionDenied
+        return render(request, "clinica/acesso_restrito.html", status=403)
     return render(
         request,
         "clinica/inicio.html",

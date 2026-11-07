@@ -1,0 +1,3 @@
+{% extends 'clinica/base.html' %}{% block title %}Acesso restrito · Espaço Desenvolver{% endblock %}{% block conteudo %}
+<section class="login painel"><span class="rotulo">ACESSO RESTRITO</span><h1>Esta conta não acessa o prontuário</h1><p>A conta {{ user.username }} não tem permissão para acessar esta área. Para continuar, entre com uma conta administrativa ou de profissional habilitado.</p>
+<a class="principal troca-conta" href="{% url 'web-entrar' %}">Entrar com outra conta</a><p class="nota">Se precisar de acesso, procure a administração da clínica.</p></section>{% endblock %}
