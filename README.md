@@ -55,8 +55,17 @@ curl http://localhost:8000/health/
 ```
 
 Abrir no navegador:
+- `http://localhost:8000/` — interface de consulta em desenvolvimento (somente dados fictícios)
 - `http://localhost:8000/admin/` — Admin (só gerencia usuários e clínicas)
 - `http://localhost:8000/api/v1/` — API browsable
+
+A interface web inicial usa a conta existente e apresenta pacientes conforme o perfil;
+profissionais podem consultar os registros acessíveis pela API. A administração não
+vê texto clínico, e TI não acessa essa tela. Ainda não há cadastro, edição, criação
+de registros ou assinatura pela interface. Ela só está habilitada nas configurações
+de desenvolvimento e não autoriza o uso com dados reais. Na rede local de testes,
+use o endereço do servidor na porta 8000; não exponha o servidor de desenvolvimento
+à internet.
 
 ## Rodar os testes
 

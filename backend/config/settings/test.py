@@ -17,3 +17,5 @@ CELERY_TASK_ALWAYS_EAGER = True
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 # SQLite nao suporta ATOMIC_REQUESTS do mesmo jeito; relaxa p/ teste
 DATABASES["default"]["ATOMIC_REQUESTS"] = False  # noqa: F405
+# Testes de templates não exigem collectstatic nem manifesto de produção.
+STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}  # noqa: F405

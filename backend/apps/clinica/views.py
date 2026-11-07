@@ -68,12 +68,16 @@ class PacienteViewSet(viewsets.ModelViewSet):
         if not user.is_authenticated:
             return Paciente.objects.none()
         if user.eh_admin:
-            return Paciente.objects.all()
+            return Paciente.objects.order_by("id")
         if user.eh_profissional_clinico:
-            return Paciente.objects.filter(
-                equipe__profissional=user,
-                equipe__ativo=True,
-            ).distinct()
+            return (
+                Paciente.objects.filter(
+                    equipe__profissional=user,
+                    equipe__ativo=True,
+                )
+                .order_by("id")
+                .distinct()
+            )
         return Paciente.objects.none()
 
     def perform_create(self, serializer):

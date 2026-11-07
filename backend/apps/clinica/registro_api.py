@@ -1,6 +1,7 @@
 """API clinica com acesso restrito a equipe e categoria."""
 
 from collections.abc import Mapping
+from uuid import UUID
 
 from django.db.models import Q
 from rest_framework import serializers, viewsets
@@ -132,7 +133,7 @@ class RegistroViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return (
+        registros = (
             Registro.objects.filter(
                 paciente__equipe__profissional=user, paciente__equipe__ativo=True
             )
@@ -141,6 +142,14 @@ class RegistroViewSet(viewsets.ModelViewSet):
             .order_by("criado_em", "id")
             .distinct()
         )
+        paciente = self.request.query_params.get("paciente")
+        if paciente is not None:
+            try:
+                paciente = UUID(paciente)
+            except (ValueError, TypeError, AttributeError) as exc:
+                raise ValidationError({"paciente": "Identificador inválido."}) from exc
+            registros = registros.filter(paciente_id=paciente)
+        return registros
 
     def perform_create(self, serializer):
         serializer.save(autor=self.request.user, categoria=self.request.user.tipo)

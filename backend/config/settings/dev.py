@@ -17,3 +17,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Celery sincrono em dev (opcional - comentar se quiser testar async)
 # CELERY_TASK_ALWAYS_EAGER = True
+
+# Interface de validação, indisponível por padrão nos demais ambientes.
+WEB_CONSULTA_HABILITADA = True
+LOGIN_REDIRECT_URL = "web-inicio"

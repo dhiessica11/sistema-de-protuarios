@@ -1,0 +1,7 @@
+{% extends 'clinica/base.html' %}{% load static %}{% block conteudo %}
+<div class="cabecalho"><div><span class="rotulo">ÁREA DE TRABALHO · TESTES</span><h1>Olá, {{ user.first_name|default:user.username }}</h1><p>Consulte os pacientes disponíveis para seu perfil.</p></div><span class="perfil">{{ user.get_tipo_display }}</span></div>
+<div class="aviso">Ambiente de desenvolvimento: utilize apenas dados fictícios. Os registros estão sem assinatura.</div>
+<div class="grade"><section class="painel"><div class="titulo"><div><span class="rotulo">ACOMPANHAMENTO</span><h2>Pacientes</h2></div></div><p class="ajuda">Selecione um paciente para consultar os registros.</p><div id="pacientes" aria-live="polite">Carregando pacientes…</div><nav class="paginacao" id="paginas" aria-label="Paginação de pacientes"></nav></section>
+<section class="painel"><span class="rotulo">PRONTUÁRIO</span><h2 id="nome-paciente">Selecione um paciente</h2><div id="registros" aria-live="polite"><p class="ajuda">Os registros disponíveis aparecerão aqui.</p></div><nav class="paginacao" id="paginas-registros" aria-label="Paginação de registros"></nav></section></div>
+<div id="config-web" data-clinico="{% if clinico %}true{% else %}false{% endif %}"></div><script src="{% static 'clinica/web.js' %}" defer></script>
+{% endblock %}
