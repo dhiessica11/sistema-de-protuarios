@@ -60,7 +60,7 @@
     selecionado = paciente;
     if (fono) for (const tipo of ['avaliacao', 'plano', 'sessao']) { document.querySelector(`#edicao-${tipo}`).textContent = ''; document.querySelector(`#cancelar-${tipo}`).hidden = true; }
     nomePaciente.textContent = paciente.nome_apresentacao;
-    if (adminTeste) { document.querySelector('#cadastro-admin').hidden = false; carregarCadastro(); carregarResponsaveis(); }
+    if (adminTeste) { document.querySelector('#cadastro-admin').hidden = false; document.querySelector('#form-novo-responsavel').reset(); document.querySelector('#mensagem-responsavel-novo').textContent = ''; carregarCadastro(); carregarResponsaveis(); }
     paginasRegistros.replaceChildren();
     if (!clinico) {
       registros.textContent = 'O perfil administrativo não acessa registros clínicos nesta área.';
@@ -125,6 +125,68 @@
       }
       paginar(nav, dados, carregarResponsaveis);
     } catch (erro) { if (atual === consultaResponsaveis) { area.textContent = erro.message; nav.replaceChildren(); } }
+  }
+  async function carregarClinicas() {
+    const seletor = document.querySelector('#clinica-paciente');
+    const ajuda = document.querySelector('#ajuda-clinica');
+    try {
+      const dados = await obter('/api/v1/clinicas/');
+      seletor.replaceChildren(new Option('Selecione uma clínica', ''));
+      for (const clinica of dados.results) seletor.append(new Option(clinica.nome, clinica.id));
+      if (!dados.results.length) {
+        ajuda.replaceChildren(document.createTextNode('Nenhuma clínica cadastrada. '));
+        const link = elemento('a', 'Cadastre uma clínica fictícia na administração.');
+        link.href = '/admin/clinica/clinica/add/'; ajuda.append(link);
+      } else if (dados.count > dados.results.length) {
+        ajuda.textContent = 'A lista exibe as primeiras 25 clínicas cadastradas.';
+      } else ajuda.textContent = '';
+    } catch (erro) { seletor.replaceChildren(new Option('Não foi possível carregar', '')); ajuda.textContent = erro.message; }
+  }
+  async function enviarCadastro(url, corpo, formulario) {
+    const token = formulario.querySelector('[name=csrfmiddlewaretoken]').value;
+    let resposta;
+    try { resposta = await fetch(url, {method:'POST', credentials:'same-origin', cache:'no-store', headers:{'Content-Type':'application/json', 'X-CSRFToken':token}, body:JSON.stringify(corpo)}); }
+    catch (_) { throw new Error('Conexão interrompida. Confira a lista antes de tentar novamente, pois o cadastro pode ter sido salvo.'); }
+    if (resposta.ok) return resposta.json();
+    let erro = null;
+    try { erro = await resposta.json(); } catch (_) { /* Resposta sem JSON. */ }
+    if (resposta.status === 400 && erro && typeof erro === 'object' && !Array.isArray(erro)) {
+      const mensagens = Object.entries(erro).map(([campo, texto]) => `${campo}: ${Array.isArray(texto) ? texto.join(' ') : String(texto)}`);
+      throw new Error(mensagens.join(' · ') || 'Confira os campos informados.');
+    }
+    throw new Error('Não foi possível confirmar o cadastro. Confira a lista antes de tentar novamente.');
+  }
+  if (adminTeste) {
+    carregarClinicas();
+    document.querySelector('#form-novo-paciente').addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      const form = evento.currentTarget, botao = form.querySelector('button[type=submit]');
+      const mensagem = document.querySelector('#mensagem-paciente-novo');
+      const selecaoAnterior = selecionado?.id || null;
+      const dados = {clinica:document.querySelector('#clinica-paciente').value, nome_civil:document.querySelector('#nome-paciente-novo').value.trim(), nome_social:document.querySelector('#social-paciente-novo').value.trim(), data_nascimento:document.querySelector('#nascimento-paciente-novo').value, sexo:document.querySelector('#sexo-paciente-novo').value, cpf:document.querySelector('#cpf-paciente-novo').value.trim()};
+      botao.disabled = true; mensagem.textContent = '';
+      try {
+        const paciente = await enviarCadastro('/api/v1/pacientes/', dados, form);
+        form.reset(); mensagem.textContent = 'Paciente fictício cadastrado.';
+        if ((selecionado?.id || null) === selecaoAnterior) selecionar(paciente);
+        await carregarPacientes();
+      } catch (erro) { mensagem.textContent = erro.message; }
+      finally { botao.disabled = false; }
+    });
+    document.querySelector('#form-novo-responsavel').addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      if (!selecionado) return;
+      const form = evento.currentTarget, botao = form.querySelector('button[type=submit]');
+      const mensagem = document.querySelector('#mensagem-responsavel-novo');
+      const pacienteId = selecionado.id;
+      const dados = {paciente:pacienteId, nome:document.querySelector('#nome-responsavel-novo').value.trim(), cpf:document.querySelector('#cpf-responsavel-novo').value.trim(), vinculo:document.querySelector('#vinculo-responsavel-novo').value, telefone_cifrado:document.querySelector('#telefone-responsavel-novo').value.trim(), email:document.querySelector('#email-responsavel-novo').value.trim(), eh_responsavel_legal_principal:document.querySelector('#principal-responsavel-novo').checked};
+      botao.disabled = true; mensagem.textContent = '';
+      try {
+        await enviarCadastro('/api/v1/responsaveis/', dados, form);
+        if (selecionado?.id === pacienteId) { form.reset(); mensagem.textContent = 'Responsável fictício cadastrado.'; await carregarResponsaveis(); }
+      } catch (erro) { if (selecionado?.id === pacienteId) mensagem.textContent = erro.message; }
+      finally { botao.disabled = false; }
+    });
   }
   async function enviar(url, corpo) {
     const token = document.querySelector('#form-avaliacao [name=csrfmiddlewaretoken]').value;

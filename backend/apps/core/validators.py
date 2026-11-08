@@ -23,7 +23,7 @@ def validar_cpf(valor: str) -> None:
     limpo = re.sub(r"\D", "", valor)
     if len(limpo) != 11:
         raise ValidationError("CPF deve ter 11 digitos")
-    if not stdnum_cpf.is_valid(limpo):
+    if len(set(limpo)) == 1 or not stdnum_cpf.is_valid(limpo):
         raise ValidationError("CPF invalido")
 
 

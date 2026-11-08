@@ -69,9 +69,9 @@ Reavaliações são vinculadas a uma avaliação anterior do mesmo protocolo. A 
 planejamento permite salvar planos de teste com metas para objetivos aprovados.
 Sessões de teste permitem registrar tentativas e visualizar seus percentuais; a
 evolução por objetivo apresenta resultados diários em períodos de até 366 dias. A
-interface ainda não possui cadastro de pacientes, criação de registros clínicos ou
-assinatura. Ela só está habilitada nas configurações de desenvolvimento e não autoriza
-o uso com dados reais. Na rede local de testes, use o endereço do servidor na porta
+interface permite à conta admin cadastrar pacientes e responsáveis fictícios. Ainda
+não há criação de registros clínicos pela interface nem assinatura. Ela só está
+habilitada nas configurações de desenvolvimento e não autoriza o uso com dados reais. Na rede local de testes, use o endereço do servidor na porta
 8000; não exponha o servidor de desenvolvimento à internet.
 
 A atualização automática **de desenvolvimento** no mini servidor está descrita em
