@@ -10,3 +10,5 @@
 .barra-trilho{height:8px;background:#edf2ee;border-radius:8px;overflow:hidden}.barra{height:100%;border-radius:8px}.barra.independente{background:#388768}.barra.ajuda-grafico{background:#d6a84c}.barra.erro-grafico{background:#c86b5a}#resultado-evolucao{margin-top:24px}#resultado-evolucao .meta{margin:12px 0 4px}
 
 .avaliacao summary{cursor:pointer;font-weight:700;color:#206f58}.avaliacao details{margin:16px 0}.avaliacao .opcao-label input[type=checkbox]{width:auto}
+
+.avaliacao form[hidden]{display:none}

@@ -8,6 +8,8 @@
   const fono = document.querySelector('#config-web').dataset.fono === 'true';
   const areaAvaliacao = document.querySelector('#avaliacoes-fono');
   const adminTeste = document.querySelector('#config-web').dataset.adminTeste === 'true';
+  let pacienteEdicao = null;
+  let responsavelEdicao = null;
   let consultaCadastro = 0;
   let consultaResponsaveis = 0;
   let consultaAvaliacao = 0;
@@ -60,7 +62,7 @@
     selecionado = paciente;
     if (fono) for (const tipo of ['avaliacao', 'plano', 'sessao']) { document.querySelector(`#edicao-${tipo}`).textContent = ''; document.querySelector(`#cancelar-${tipo}`).hidden = true; }
     nomePaciente.textContent = paciente.nome_apresentacao;
-    if (adminTeste) { document.querySelector('#cadastro-admin').hidden = false; document.querySelector('#form-novo-responsavel').reset(); document.querySelector('#mensagem-responsavel-novo').textContent = ''; carregarCadastro(); carregarResponsaveis(); }
+    if (adminTeste) { cancelarEdicao('paciente'); cancelarEdicao('responsavel'); document.querySelector('#cadastro-admin').hidden = false; document.querySelector('#form-novo-responsavel').reset(); document.querySelector('#mensagem-responsavel-novo').textContent = ''; carregarCadastro(); carregarResponsaveis(); }
     paginasRegistros.replaceChildren();
     if (!clinico) {
       registros.textContent = 'O perfil administrativo não acessa registros clínicos nesta área.';
@@ -104,6 +106,8 @@
       area.replaceChildren();
       const campos = [['Nome civil', 'nome_civil'], ['Nome social', 'nome_social'], ['CPF', 'cpf'], ['Nascimento', 'data_nascimento'], ['Sexo', 'sexo'], ['Nacionalidade', 'nacionalidade'], ['Naturalidade', 'naturalidade'], ['Endereço', 'endereco_cifrado'], ['Telefone', 'telefone_cifrado'], ['Status', 'status'], ['Encerramento', 'data_encerramento']];
       for (const [rotulo, chave] of campos) if (dados[chave]) area.append(elemento('p', `${rotulo}: ${dados[chave]}`));
+      const editar = elemento('button', 'Editar dados do paciente', 'secundario'); editar.type = 'button';
+      editar.addEventListener('click', () => abrirEdicaoPaciente(dados)); area.append(editar);
     } catch (erro) { if (atual === consultaCadastro) area.textContent = erro.message; }
   }
   async function carregarResponsaveis(pagina = 1) {
@@ -121,6 +125,8 @@
         const campos = [['Nome', 'nome'], ['CPF', 'cpf'], ['Vínculo', 'vinculo'], ['Telefone', 'telefone_cifrado'], ['E-mail', 'email'], ['Comprovante', 'comprovante_vinculo_pendente']];
         for (const [rotulo, chave] of campos) if (pessoa[chave]) bloco.append(elemento('p', `${rotulo}: ${pessoa[chave]}`));
         bloco.append(elemento('p', `Ativo: ${pessoa.ativo ? 'sim' : 'não'} · Responsável principal: ${pessoa.eh_responsavel_legal_principal ? 'sim' : 'não'} · Guarda compartilhada: ${pessoa.guarda_compartilhada ? 'sim' : 'não'}`));
+        const editar = elemento('button', 'Editar responsável', 'secundario'); editar.type = 'button';
+        editar.addEventListener('click', () => abrirEdicaoResponsavel(pessoa)); bloco.append(editar);
         area.append(bloco);
       }
       paginar(nav, dados, carregarResponsaveis);
@@ -142,21 +148,90 @@
       } else ajuda.textContent = '';
     } catch (erro) { seletor.replaceChildren(new Option('Não foi possível carregar', '')); ajuda.textContent = erro.message; }
   }
-  async function enviarCadastro(url, corpo, formulario) {
+  async function enviarCadastro(url, corpo, formulario, metodo = 'POST') {
     const token = formulario.querySelector('[name=csrfmiddlewaretoken]').value;
     let resposta;
-    try { resposta = await fetch(url, {method:'POST', credentials:'same-origin', cache:'no-store', headers:{'Content-Type':'application/json', 'X-CSRFToken':token}, body:JSON.stringify(corpo)}); }
+    try { resposta = await fetch(url, {method:metodo, credentials:'same-origin', cache:'no-store', headers:{'Content-Type':'application/json', 'X-CSRFToken':token}, body:JSON.stringify(corpo)}); }
     catch (_) { throw new Error('Conexão interrompida. Confira a lista antes de tentar novamente, pois o cadastro pode ter sido salvo.'); }
     if (resposta.ok) return resposta.json();
     let erro = null;
     try { erro = await resposta.json(); } catch (_) { /* Resposta sem JSON. */ }
+    if (resposta.status === 409) throw new Error('Este cadastro foi alterado. Cancele a edição e abra novamente para conferir os dados atuais.');
     if (resposta.status === 400 && erro && typeof erro === 'object' && !Array.isArray(erro)) {
       const mensagens = Object.entries(erro).map(([campo, texto]) => `${campo}: ${Array.isArray(texto) ? texto.join(' ') : String(texto)}`);
       throw new Error(mensagens.join(' · ') || 'Confira os campos informados.');
     }
     throw new Error('Não foi possível confirmar o cadastro. Confira a lista antes de tentar novamente.');
   }
+  const camposPaciente = [
+    ['editar-nome-paciente', 'nome_civil'], ['editar-social-paciente', 'nome_social'],
+    ['editar-cpf-paciente', 'cpf'], ['editar-nascimento-paciente', 'data_nascimento'],
+    ['editar-sexo-paciente', 'sexo'], ['editar-nacionalidade-paciente', 'nacionalidade'],
+    ['editar-naturalidade-paciente', 'naturalidade'], ['editar-endereco-paciente', 'endereco_cifrado'],
+    ['editar-telefone-paciente', 'telefone_cifrado'],
+  ];
+  const camposResponsavel = [
+    ['editar-nome-responsavel', 'nome'], ['editar-cpf-responsavel', 'cpf'],
+    ['editar-vinculo-responsavel', 'vinculo'], ['editar-telefone-responsavel', 'telefone_cifrado'],
+    ['editar-email-responsavel', 'email'],
+  ];
+  function cancelarEdicao(tipo) {
+    const form = document.querySelector(`#form-editar-${tipo}`);
+    form.reset(); form.hidden = true;
+    document.querySelector(`#mensagem-editar-${tipo}`).textContent = '';
+    if (tipo === 'paciente') pacienteEdicao = null; else responsavelEdicao = null;
+  }
+  function abrirEdicao(tipo, dados, campos) {
+    if (tipo === 'paciente') pacienteEdicao = dados; else responsavelEdicao = dados;
+    const form = document.querySelector(`#form-editar-${tipo}`); form.reset();
+    for (const [id, chave] of campos) document.getElementById(id).value = dados[chave] ?? '';
+    document.querySelector(`#mensagem-editar-${tipo}`).textContent = '';
+    form.hidden = false; form.scrollIntoView({behavior:'smooth'});
+  }
+  function abrirEdicaoPaciente(dados) { abrirEdicao('paciente', dados, camposPaciente); }
+  function abrirEdicaoResponsavel(dados) { abrirEdicao('responsavel', dados, camposResponsavel); }
+  function diferencas(campos, original) {
+    const mudancas = {};
+    for (const [id, chave] of campos) {
+      let valor = document.getElementById(id).value.trim();
+      let anterior = String(original[chave] ?? '').trim();
+      if (chave === 'cpf') { valor = valor.replace(/\D/g, ''); anterior = anterior.replace(/\D/g, ''); }
+      if (valor !== anterior) mudancas[chave] = valor;
+    }
+    return mudancas;
+  }
+  async function salvarEdicao(evento, tipo) {
+    evento.preventDefault();
+    const form = evento.currentTarget;
+    const original = tipo === 'paciente' ? pacienteEdicao : responsavelEdicao;
+    if (!original || !selecionado) return;
+    const pacienteId = selecionado.id;
+    const campos = tipo === 'paciente' ? camposPaciente : camposResponsavel;
+    const identificacao = tipo === 'paciente' ? ['nome_civil', 'cpf', 'data_nascimento', 'sexo', 'nacionalidade', 'naturalidade'] : ['nome', 'cpf'];
+    const mudancas = diferencas(campos, original);
+    const mensagem = document.querySelector(`#mensagem-editar-${tipo}`);
+    if (!Object.keys(mudancas).length) { mensagem.textContent = 'Nenhuma alteração informada.'; return; }
+    const motivo = document.querySelector(`#motivo-editar-${tipo}`).value.trim();
+    if (identificacao.some(campo => campo in mudancas) && motivo.length < 10) { mensagem.textContent = 'Informe o motivo da alteração de identificação com pelo menos 10 caracteres.'; return; }
+    const corpo = {...mudancas, versao_esperada: original.atualizado_em};
+    if (motivo) corpo.justificativa_alteracao = motivo;
+    const botao = form.querySelector('button[type=submit]'); botao.disabled = true; mensagem.textContent = '';
+    const rota = tipo === 'paciente' ? 'pacientes' : 'responsaveis';
+    try {
+      const atualizado = await enviarCadastro(`/api/v1/${rota}/${encodeURIComponent(original.id)}/`, corpo, form, 'PATCH');
+      if (selecionado?.id !== pacienteId) return;
+      cancelarEdicao(tipo);
+      if (tipo === 'paciente') { selecionado = atualizado; nomePaciente.textContent = atualizado.nome_apresentacao; await carregarCadastro(); await carregarPacientes(); }
+      else await carregarResponsaveis();
+      document.querySelector(tipo === 'paciente' ? '#dados-cadastrais' : '#responsaveis-admin').prepend(elemento('p', 'Alterações salvas.', 'ajuda'));
+    } catch (erro) { if (selecionado?.id === pacienteId) mensagem.textContent = erro.message; }
+    finally { botao.disabled = false; }
+  }
   if (adminTeste) {
+    for (const tipo of ['paciente', 'responsavel']) {
+      document.querySelector(`#cancelar-editar-${tipo}`).addEventListener('click', () => cancelarEdicao(tipo));
+      document.querySelector(`#form-editar-${tipo}`).addEventListener('submit', evento => salvarEdicao(evento, tipo));
+    }
     carregarClinicas();
     document.querySelector('#form-novo-paciente').addEventListener('submit', async (evento) => {
       evento.preventDefault();

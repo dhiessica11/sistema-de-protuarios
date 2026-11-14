@@ -4,6 +4,7 @@ Serializers DRF - validacao de regras de negocio ANTES de persistir.
 
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
 
 from apps.core.validators import normalizar_cpf, validar_cpf, validar_data_nascimento
 
@@ -48,10 +49,19 @@ class ClinicaSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "criado_em", "atualizado_em")
 
 
+class CadastroDesatualizado(APIException):
+    status_code = 409
+    default_detail = (
+        "O cadastro foi alterado desde a abertura. Recarregue os dados antes de salvar."
+    )
+    default_code = "cadastro_desatualizado"
+
+
 class CadastroProtegidoSerializer(serializers.ModelSerializer):
     justificativa_alteracao = serializers.CharField(
         write_only=True, required=False, min_length=10, max_length=2000
     )
+    versao_esperada = serializers.DateTimeField(write_only=True, required=False)
     campos_atualizacao_clinico = frozenset()
 
     def to_internal_value(self, data):
@@ -86,6 +96,9 @@ class CadastroProtegidoSerializer(serializers.ModelSerializer):
         # dispensar justificativa nem sobrescrever campos de outro perfil.
         instance = self.Meta.model.objects.select_for_update().get(pk=instance.pk)
         self.instance = instance
+        esperada = validated_data.pop("versao_esperada", None)
+        if esperada is not None and instance.atualizado_em != esperada:
+            raise CadastroDesatualizado()
         validated_data = self.validate(validated_data)
         campos = self.campos_identificacao_alterados(validated_data)
         justificativa = validated_data.pop("justificativa_alteracao", None)
@@ -119,7 +132,7 @@ class PacienteSerializer(CadastroProtegidoSerializer):
             "telefone_cifrado",
         }
     )
-    campos_atualizacao_admin = campos_criacao_admin | {"justificativa_alteracao"}
+    campos_atualizacao_admin = campos_criacao_admin | {"justificativa_alteracao", "versao_esperada"}
     campos_atualizacao_clinico = frozenset({"nome_social", "status", "data_encerramento"})
     campos_identificacao = {
         "nome_civil": "nome_civil",
@@ -159,6 +172,7 @@ class PacienteSerializer(CadastroProtegidoSerializer):
             "criado_em",
             "atualizado_em",
             "justificativa_alteracao",
+            "versao_esperada",
         )
         read_only_fields = (
             "id",
@@ -212,7 +226,7 @@ class ResponsavelSerializer(CadastroProtegidoSerializer):
             "ativo",
         }
     )
-    campos_atualizacao_admin = campos_criacao_admin | {"justificativa_alteracao"}
+    campos_atualizacao_admin = campos_criacao_admin | {"justificativa_alteracao", "versao_esperada"}
     campos_identificacao = {"nome_cifrado": "nome", "cpf_cifrado": "cpf"}
     cpf = serializers.CharField(source="cpf_cifrado", write_only=True)
     nome = serializers.CharField(source="nome_cifrado", write_only=True, max_length=200)
@@ -232,9 +246,11 @@ class ResponsavelSerializer(CadastroProtegidoSerializer):
             "comprovante_vinculo_pendente",
             "ativo",
             "criado_em",
+            "atualizado_em",
             "justificativa_alteracao",
+            "versao_esperada",
         )
-        read_only_fields = ("id", "criado_em")
+        read_only_fields = ("id", "criado_em", "atualizado_em")
 
     def get_fields(self):
         fields = super().get_fields()
